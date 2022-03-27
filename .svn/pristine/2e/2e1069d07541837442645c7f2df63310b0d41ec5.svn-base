@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../../css/Hui.css"/>
+      <style>
+
+          .intro {
+              color: #898989;
+              letter-spacing: 2px;
+              line-height: 1.5;
+              padding: 20px 25px;
+
+          }
+          #desc{
+            border-top: 0 solid #e5e5e5;
+          }
+      </style>
+  </head>
+  <body class="">
+    <div class="intro">
+       <div id="desc"></div>
+    </div>
+
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+         var text=api.pageParam.info.briefDesc
+         if(text==''){
+           str1 = '<div class=""><p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">暂无数据...</p><div class="H-padding-vertical-bottom-10"></div></div>';
+
+           $api.html($api.byId('desc'), str1);
+         }else{
+           $api.html($api.byId('desc'), text);
+         }
+
+
+      };
+  </script>
+  </html>

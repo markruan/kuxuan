@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <style>
+        .zanting {
+            width: 20px;
+            height: 20px;
+            margin-left: -45px;
+            margin-top: 25px
+        }
+
+        .arrow_down {
+            display: block;
+            background-size: 15px;
+            background-repeat: no-repeat;
+            background-position: center;
+            /*padding: 15px;*/
+            -webkit-box-flex: 1;
+            -webkit-transform: rotate(180deg);
+            -webkit-transition: All .5s ease;
+        }
+
+        .arrow_up {
+            -webkit-transform: rotate(0deg);
+            -webkit-transition: All .5s ease;
+        }
+    </style>
+</head>
+<script type="text/html" id="tppl">
+
+
+    <% for(var i=0; i < list.length; i++){ %>
+        <div class=" H-display-table-cell H-float-left  H-box-sizing-border-box H-width-avg-2 H-padding-horizontal-right-10 H-margin-vertical-bottom-10" onclick="openMusicList(<%=list[i].id %>)">
+            <img data-echo="<%=imageCache(list[i].imgPath+'?param=200y200')%>" src="../../image/default.jpg" class=" H-width-100-percent H-display-block H-paper-2 animated fadeIn" alt="" title="">
+            <div class="H-text-align-center H-font-size-12 H-padding-vertical-top-5 H-text-show-row-1">
+                <%=list[i].goodsName.substring(0,16) %>
+            </div>
+        </div>
+        <% } %>
+</script>
+
+<body id="body">
+    <header class="H-header H-theme-background-color-white H-position-fixed H-z-index-100" id="header" style="top:0px;right:0;height:50px">
+        <span tapmode="" class="H-icon H-position-relative H-display-inline-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-left-5 H-z-index-100"><i class="H-iconfont H-icon-arrow-left H-font-size-18 H-vertical-middle"></i></span>
+        <div class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent">
+
+        </div>
+        <span tapmode="" class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-black H-padding-horizontal-right-20 H-z-index-100" data-click='0' onclick="openArrow(this)"><i data-click="0" class="H-iconfont H-icon-wangge H-font-size-18 H-padding-vertical-top-10"></i></span>
+    </header>
+    <div class="result H-margin-vertical-top-20 H-padding-horizontal-left-10" id="list" style="margin-top:55px"></div>
+</body>
+<script type="text/javascript" src="../../script/H.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<!-- <script type="text/javascript" src="../../script/echo.min.js"></script> -->
+<!-- <script type="text/javascript" src="../../script/comm.js"></script>
+<script type="text/javascript" src="../../script/music.js"></script>
+<script type="text/javascript" src="../../script/jquery/jquery.min.js"></script> -->
+
+
+<script type="text/javascript">
+    H.tppl_flag = ["<%", "%>"];
+    var app = new Vue({
+        el: "#body",
+        data: {
+            index: 0,
+            cat: '流行',
+            menulength: '',
+            menudata: [],
+            listdata: [],
+            page: 1,
+            frames: [],
+            nav: false,
+            isIndex1: true
+        },
+        watch: {
+            index(curVal, oldVal) {
+
+                this.cat = 　this.menudata[curVal].title
+            }
+        },
+        methods: {
+            init() {
+
+                api.openFrameGroup({
+                    name: 'group2',
+                    background: '#fff',
+                    scrollEnabled: true,
+                    rect: {
+                        x: 0,
+                        y: 160,
+                        w: 'auto',
+                        h: api.winHeight - 160 - 55
+                    },
+                    index: 1,
+                    preload: 1,
+                    frames: app.frames
+                }, function(ret, err) {
+                    if (ret) {
+
+
+                        if (ret.index == 0) {
+                            api.setFrameGroupIndex({
+                                name: 'groups',
+                                index: 1,
+                                scroll: true
+                            });
+                            api.setFrameGroupAttr({
+                                name: 'group2',
+                                hidden: true
+                            });
+
+                        } else if (ret.index == 1 && app.isIndex1) {
+
+                            api.setFrameGroupAttr({
+                                name: 'group2',
+                                hidden: true
+                            });
+                            app.isIndex1 = false
+
+
+                            api.execScript({
+                                name: 'index',
+                                script: 'setNavBarAttr("' + ret.index + '")'
+                            });
+
+                        } else {
+                            api.setFrameGroupAttr({
+                                name: 'group2',
+                                hidden: false
+                            });
+                            api.execScript({
+                                name: 'index',
+                                script: 'setNavBarAttr("' + ret.index + '")'
+                            });
+
+                            // api.sendEvent({
+                            //     name: 'setNvIndex',
+                            //     extra: {
+                            //         index: ret.index,
+                            //         list: app.menudata
+                            //     }
+                            // });
+                        }
+                    } else {
+
+                        alert(JSON.stringify(err));
+                    }
+                });
+            }
+        }
+    })
+
+
+    function getcatlist() {
+
+        getCache('menudata', 'list', function(ret, err) {
+
+            if (ret.code == 0) {
+                var data = $api.strToJson(ret.data)
+                app.menudata = data.filter(function(s) {
+                    return s.select == true
+                })
+
+
+                for (var i = 0; i < app.menudata.length; i++) {
+                    var frame = {}
+                    frame.name = app.menudata[i].title,
+                        frame.url = 'frames.html',
+                        frame.bgColor = '#fff',
+                        frame.bounces = false
+                    app.frames[i] = frame
+                }
+
+                app.menulength = app.menudata.length
+                    // getdata()
+                app.init()
+
+            } else {
+                api.readFile({
+                    path: 'widget://res/catlist.json'
+                }, function(ret, err) {
+                    if (ret) {
+                        var data = $api.strToJson(ret.data)
+                            // console.log(JSON.stringify(data));
+
+                        app.menudata = data.filter(function(s) {
+                            return s.select == true
+                        })
+                        saveCache('menudata', 'list', app.menudata)
+                        for (var i = 0; i < app.menudata.length; i++) {
+                            var frame = {}
+                            frame.name = app.menudata[i].title,
+                                frame.url = 'frames.html',
+                                frame.bgColor = '#fff',
+                                frame.bounces = false
+                            app.frames[i] = frame
+                        }
+
+                        app.menulength = app.menudata.length
+                        app.init()
+
+                    }
+                });
+            }
+        })
+
+    }
+    H.ready(function() {
+        getcatlist()
+        api.setFrameAttr({
+            name: api.frameName,
+            bounces: false,
+        });
+
+
+    });
+
+    function openArrow(button) {
+
+        getCache('menudata', 'list', function(ret, err) {
+            if (ret.data) {
+                var data = $api.strToJson(ret.data)
+
+                var UIMultiSelector = api.require('UIMultiSelector');
+                UIMultiSelector.open({
+                    rect: {
+                        h: api.winHeight / 2
+                    },
+                    text: {
+                        title: '分类选择',
+                        leftBtn: '取消',
+                        rightBtn: '保存',
+                        selectAll: '全选'
+                    },
+                    max: 0,
+                    singleSelection: false,
+                    styles: {
+                        mask: 'rgba(0, 0, 0, 0.27058823529411763)',
+                        title: {
+                            bg: '#f5f5f5',
+                            color: 'rgb(0,0,0)',
+                            size: 16,
+                            h: 44
+                        },
+                        leftButton: {
+                            w: 80,
+                            h: 35,
+                            marginT: 5,
+                            marginL: 8,
+                            color: '#fff',
+                            bg: '#FFAA85',
+                            size: 14,
+                        },
+                        rightButton: {
+                            w: 80,
+                            h: 35,
+                            marginT: 5,
+                            marginR: 8,
+                            color: '#fff',
+                            bg: '#B3315F',
+                            size: 14,
+                        },
+                        item: {
+                            h: 55,
+                            bg: '#f3f1f1',
+                            bgActive: '#f3f1f1',
+                            bgHighlight: '#e0bebe',
+                            color: 'rgb(0,0,0)',
+                            active: '#f75454',
+                            highlight: '#B3315F',
+                            size: 14,
+                            lineColor: 'rgb(200,200,200)',
+                            textAlign: 'center',
+                        },
+                        icon: {
+                            w: 20,
+                            h: 20,
+                            marginT: 11,
+                            marginH: 10,
+                            bg: '#fff',
+                            bgActive: 'widget://image/dui.png',
+                            align: 'left'
+                        }
+                    },
+                    animation: true,
+                    items: data
+                }, function(ret, err) {
+
+
+                    switch (ret.eventType) {
+                        case 'clickItem':
+
+                            break;
+                        case 'clickRight':
+                            uiloading()
+
+                            var list = ret.items
+                            for (var i = 0; i < data.length; i++) {
+                                data[i].status = 'normal'
+                                data[i].select = false
+                            }
+                            for (var i = 0; i < list.length; i++) {
+                                if (list[i].status == 'selected') {
+                                    for (var l = 0; l < data.length; l++) {
+                                        if (list[i].title == data[l].title) {
+                                            data[l].status = 'selected'
+                                            data[l].select = true
+                                        }
+                                    }
+                                }
+
+                            }
+
+                            setTimeout(function() {
+
+                                saveCache('menudata', 'list', data)
+                                getcatlist()
+                                api.closeFrameGroup({
+                                    name: 'group2'
+                                });
+                                api.sendEvent({
+                                    name: 'updateCat',
+                                });
+
+                                UIMultiSelector.close();
+
+                            }, 1800)
+                            break;
+                        case 'clickLeft':
+                            UIMultiSelector.close();
+                            break;
+                        default:
+
+                    }
+                });
+            }
+        })
+
+    }
+</script>
+
+</html>

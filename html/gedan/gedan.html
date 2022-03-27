@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link href="../../css/Hui.css" rel="stylesheet" type="text/css" />
+    <style>
+        .fresh {
+            height: 35px;
+            width: 100%;
+            background-image: url('../../image/loading_more.gif');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+        }
+
+        #imgg {
+            height: 44px;
+            margin-left: 60px
+        }
+
+        .H-font-size-10 {
+            font-size: 8px;
+        }
+
+        .H-flexbox-horizontal1 {
+            display: box;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-orient: horizontal;
+            -webkit-flex-flow: row;
+            flex-flow: row;
+            -webkit-flex-direction: row;
+            flex-direction: row;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body id="body">
+    <div id="main" class="H-margin-vertical-top-10  H-clear-both H-width-100-percent H-display-table H-box-sizing-border-box H-padding-horizontal-left-10"></div>
+    <div class="H-header  H-display-block   " id="footer">
+
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/echo.min.js"></script>
+<!-- <script type="text/javascript" src="../../script/H.js"></script> -->
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+
+<script type="text/javascript">
+    var datalist;
+    var tuilist;
+    var initdata
+    var data1 = []
+
+    //  获取用户的歌单
+
+
+    function findinfo1() {
+        uiloading()
+        var params = {
+            uid: uid,
+            timestamp: timestamp
+        }
+        $ku.getUserPlaylist(params, function(ret, err) {
+            if (ret.playlist.length > 0) {
+                var data
+                var count, startnum
+                var arr = ret.playlist
+                data = arr.filter(function(x) {
+                    return x.creator.userId == uid;
+                });
+
+                for (var i = 0; i < data.length; i++) {
+                    var list = {}
+                    list.title = data[i].name
+                    list.id = data[i].id
+                    list.subTitle = data[i].trackCount + '首歌曲'
+                    list.goodsNameSize = 10
+                    list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+                    list.imgPath = imageCache(data[i].coverImgUrl + '?param=200y200'),
+                        data1[i] = list
+                }
+                initdata(data1)
+                    // 存储收藏的歌单ID,歌单list页面使用
+                var likelistids = []
+
+                for (var i = 0; i < ret.playlist.length; i++) {
+                    var list = []
+                    list = ret.playlist[i].id
+                    likelistids[i] = list
+                }
+                $api.setStorage('likelistids', likelistids);
+                stoploading()
+
+            } else {
+
+
+                $api.html($api.byId('footer'), '<div  class="H-header-title H-center-all H-font-size-14 H-text-show-row-1 H-theme-font-color-ccc H-position-absolute H-width-100-percent">没有数据......</div>');
+                stoploading();
+                api.refreshHeaderLoadDone();
+            }
+        });
+    }
+
+    function update() {
+        var params = {
+            uid: uid,
+            timestamp: timestamp
+        }
+        $ku.getUserPlaylist(params, function(ret, err) {
+            if (ret.playlist.length > 0) {
+                var data
+                var count, startnum
+                var arr = ret.playlist
+                data = arr.filter(function(x) {
+                    return x.creator.userId == uid;
+                });
+
+                for (var i = 0; i < data.length; i++) {
+                    var list = {}
+                    list.title = data[i].name
+                    list.id = data[i].id
+                    list.subTitle = data[i].trackCount + '首歌曲'
+
+                    list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+                    list.imgPath = imageCache(data[i].coverImgUrl + '?param=200y200'),
+                        data1[i] = list
+                }
+                data1.splice(0, 1) //删除第一个收藏歌曲歌单
+                var UIListView = api.require('UIListView');
+                UIListView.reloadData({
+                    data: data1
+                }, function(ret) {
+                    if (ret) {
+
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+            } else {
+                $api.html($api.byId('footer'), '<div  class="H-header-title H-center-all H-font-size-14 H-text-show-row-1 H-theme-font-color-ccc H-position-absolute H-width-100-percent">没有数据......</div>');
+                stoploading();
+                api.refreshHeaderLoadDone();
+            }
+        });
+    }
+    apiready = function() {
+        uid = api.pageParam.uid
+        findinfo1()
+    };
+
+    function initdata(data) {
+        api.execScript({
+            name: 'index',
+            script: 'app.showfloatModule();'
+        });
+        data.splice(0, 1) //删除第一条喜欢歌单
+        var UIListView = api.require('UIListView');
+        var listheight = api.systemType == "android" ? 69 : 64
+        UIListView.open({
+            rect: {
+                x: 0,
+                y: listheight,
+                w: api.winWidth,
+                h: api.frameHeight + listheight
+
+            },
+            data: data,
+            styles: {
+                borderColor: '#f1ecec',
+                item: {
+                    bgColor: '#FFF',
+                    activeBgColor: '#F5F5F5',
+                    height: 70.0,
+                    imgWidth: 55,
+                    imgHeight: 55,
+                    imgCorner: 2,
+                    placeholderImg: '',
+                    titleSize: 16.0,
+                    titleColor: '#333',
+                    subTitleSize: 12.0,
+                    subTitleColor: 'rgb(50,50,50)',
+                    remarkColor: '#000',
+                    remarkSize: 16,
+                    remarkIconWidth: 30
+                }
+            },
+            // fixedOn: api.frameName
+        }, function(ret, err) {
+            stoploading()
+            if (ret.eventType == "clickContent" || ret.eventType == "clickImg") {
+
+                openMusicList(data[ret.index].id, ret.index)
+                    // alert(JSON.stringify(data));
+            } else if (ret.eventType == "clickRemark") {
+                var index = ret.index
+                api.confirm({
+                    title: '警告',
+                    msg: '删除歌单',
+                    buttons: ['确定', '取消']
+                }, function(ret, err) {
+                    if (ret.buttonIndex == 1) {
+                        $ku.delPlayList({
+                            id: data[index].id,
+                            timestamp: timestamp
+                        }, function(ret, err) {
+
+                            if (ret.code == 200) {
+                                api.toast({
+                                    msg: '删除成功',
+                                    duration: 2000,
+                                    location: 'bottom'
+                                });
+
+                            } else {
+                                api.toast({
+                                    msg: '删除成功',
+                                    duration: 2000,
+                                    location: 'bottom'
+                                });
+                            }
+                        })
+                    } else {
+                        // alert(JSON.stringify(err));
+                    }
+                });
+
+                // quxiao(data[ret.index].id, ret.index)
+            } else {
+
+            }
+
+        });
+        var UIListView = api.require('UIListView');
+        UIListView.setRefreshHeader({
+            loadingImg: 'widget://image/refresh.png',
+            bgColor: '#F5F5F5',
+            textColor: '#8E8E8E',
+            textDown: '下拉可以刷新...',
+            textUp: '松开开始刷新...',
+            showTime: true
+        }, function(ret, err) {
+            if (ret) {
+                update()
+
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+    }
+</script>
+
+</html>

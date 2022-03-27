@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        body,
+        html {
+            background-color: #fff
+        }
+
+        .bg {
+            width: 100%;
+            height: 200px;
+            line-height: 200px;
+        }
+
+        .bg-blur {
+            float: left;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            -webkit-filter: blur(30px);
+            -moz-filter: blur(30px);
+            -o-filter: blur(30px);
+            -ms-filter: blur(30px);
+            filter: blur(30px);
+        }
+
+        .font-content {
+             position: absolute;
+             width: 100%;
+             height: 140px;
+             background-color:transparent;
+
+              /*line-height: 200px;*/
+              left: 50%;
+              top:100px;
+
+            transform: translate3d(-50%, -50%, 0);
+            /* border:2px solid red; */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-show="isfinish" >
+        <div class="bg bg-blur" :style="{backgroundImage: 'url('+ablumInfo.picUrl+'?param=50y50)'}"></div>
+        <div tapmode="" onclick="" class="H-flexbox-horizontal H-theme-background-color-white H-clear-both font-content">
+            <div class="H-padding-vertical-both-10 H-box-sizing-border-box "><img :src="ablumInfo.picUrl+'?param=200y200'" alt="" title="" class="H-display-block H-margin-horizontal-left-10 H-paper-2" style="width: 120px; height: 120px;"></div>
+            <div class="H-flex-item H-padding-10 H-position-relative H-box-sizing-border-box H-theme-font-color-white " >
+                <span class="H-flex-item  H-font-size-18 H-theme-font-color-white H-text-show-row-1" >{{ablumInfo.name}}</span>
+                <span class="H-flex-item  H-font-size-14 H-theme-font-color-white H-text-show-row-1" >歌手:{{ablumInfo.artist.name}}</span>
+                <!-- <span class="H-flex-item  H-font-size-14 H-theme-font-color-white H-text-show-row-1" >简介:</span> -->
+
+                <strong class="H-font-weight-normal H-theme-font-color-white font-weight-500 H-font-size-12 H-display-block H-text-show-row-4"> &nbsp&nbsp&nbsp&nbsp{{ablumInfo.description}}介绍</strong>
+
+            </div>
+
+        </div>
+        <div class="H-flexbox-horizontal H-box-sizing-border-box H-margin-vertical-bottom-10">
+            <div class="H-flex-item H-text-align-center"@click="openCom(ablumInfo.id)">
+                <span class="H-vertical-middle H-horizontal-center H-margin-horizontal-auto H-width-40 H-height-40 H-theme-background-color4 H-border-radius-circle H-paper-2" >
+                    <i class="H-iconfont H-icon-msg H-display-block H-display-block H-font-size-20 H-theme-font-color-white"></i>
+                </span>
+                <span class="H-font-size-13 H-theme-font-color-666 H-padding-vertical-top-3 H-display-block H-text-show-row-1">{{ablumInfo.info.commentCount}}</span>
+            </div>
+            <div class="H-flex-item H-text-align-center">
+                <span class="H-vertical-middle H-horizontal-center H-margin-horizontal-auto H-width-40 H-height-40 H-theme-background-color4 H-border-radius-circle H-paper-2">
+                    <i class="H-iconfont H-icon-share H-display-block H-display-block H-font-size-20 H-theme-font-color-white"></i>
+                </span>
+                <span class="H-font-size-13 H-theme-font-color-666 H-padding-vertical-top-3 H-display-block H-text-show-row-1">{{ablumInfo.info.shareCount}}</span>
+            </div>
+            <div class="H-flex-item H-text-align-center" @click="albumArt(ablumInfo.id,ablumInfo.info.liked)">
+                <span class="H-vertical-middle H-horizontal-center H-margin-horizontal-auto H-width-40 H-height-40 H-theme-background-color5 H-border-radius-circle H-paper-2">
+                    <i class="H-iconfont  H-display-block H-display-block H-font-size-20 H-theme-font-color-white" :class="[ablumInfo.info.liked?'H-icon-like-null ':'H-icon-add']"></i>
+                </span>
+                <span class="H-font-size-13 H-theme-font-color-666 H-padding-vertical-top-3 H-display-block H-text-show-row-1">{{ablumInfo.info.liked?"已收藏":"收藏"}}</span>
+            </div>
+
+
+        </div>
+        <div class="H-channel-title H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after">
+            <div class="H-channel-line H-theme-background-color-black H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1">专辑列表</div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    apiready = function() {
+
+        app.initData()
+
+        api.execScript({
+            name: 'index',
+            script: 'app.showfloatModule();'
+        });
+    };
+    var app = new Vue({
+        el: "#app",
+        data: {
+            songslist: [],
+            bgimage:{},
+            isfinish: false,
+            liked:false,
+            ablumInfo: {
+                picUrl: {},
+                name: {},
+                description: {},
+                info: {
+                    commentCount: {},
+
+                },
+                artist: {
+                    name: {}
+                }
+            },
+        },
+        methods: {
+            initData() {
+                uiloading()
+                $ku.getAlbumInfo({id:api.pageParam.data.id},function(ret,err){
+                    if (ret.code == 200) {
+                        var data = ret.songs
+                        app.ablumInfo = ret.album
+                        for (var i = 0; i < ret.songs.length; i++) {
+                            var list = {}
+                            if (ret.songs[i].privilege.fee === 1) {
+
+                                list.remark = "vip "
+                            }
+                            list.st = ret.songs[i].privilege.st
+                            list.title = ret.songs[i].name
+                            list.titleColor = '#999'
+                            list.subTitle = ret.songs[i].ar[0].name
+                            list.id = ret.songs[i].id
+                            list.aid = ret.songs[i].ar[0].id
+                            list.imgPath = 'widget://image/tou.png'
+                            list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+                            app.songslist[i] = list
+                        }
+                        app.initSong()
+                        app.isfinish = true
+                        stoploading()
+
+                        // alert( JSON.stringify( ret ) );
+
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+
+            },
+            openMusic: function(id, index) {
+
+                // api.sendEvent({
+                //     name: 'songid',
+                //     extra: {
+                //         id: sid,
+                //         index: index,
+                //         songlist: $api.jsonToStr(app.songslist)
+                //     }
+                // })
+                api.execScript({
+                    name:'index',
+                    script: 'getSongId('+id+','+index+')'
+                });
+                $api.setStorage('listm', app.songslist);
+            },
+
+            initSong() {
+
+                var UIListView = api.require('UIListView');
+
+                UIListView.open({
+                    rect: {
+                        x: 0,
+                        y: 380,
+                        w: api.winWidth,
+                        h: api.frameHeight + 256
+                    },
+                    data: app.songslist,
+                    styles: {
+                        borderColor: '#f1ecec',
+                        item: {
+                            bgColor: '#FFF',
+                            activeBgColor: '#F5F5F5',
+                            height: 60,
+                            imgWidth: 1,
+                            imgHeight: 50,
+                            titleSize: 16.0,
+                            titleColor: '#333',
+                            subTitleSize: 10.0,
+                            subTitleColor: 'rgb(50,50,50)',
+                            remarkColor: '#ff0000'
+                        }
+                    },
+                    // fixedOn: api.frameName
+                }, function(ret, err) {
+                    var index = ret.index
+                    var obj = app.songslist[index]
+                    if (ret.eventType == 'clickContent') {
+                        if (obj.st != 0) {
+                            alert('权限问题无法播放，请视听其它音乐')
+                        } else {
+                            app.openMusic(obj.id, index)
+                        }
+
+                    } else if (ret.eventType == 'clickRemark') {
+                        app.openmenu(obj.id, obj.aid, app.ablumInfo)
+                    }
+                });
+            },
+            openCom(id){
+              if (!$api.getStorage('userinfo')) {
+                api.toast({
+                  msg: '请先登陆'
+                });
+                return
+              }
+              api.openWin({
+                name: 'comm',
+                url: '../../html/music/comm/head.html',
+                opaque: true,
+                vScrollBarEnabled: false,
+                pageParam: {
+                  type: 3,
+                  sid: id
+                }
+              });
+            },
+            albumArt(id,isliked){
+              if (isliked) {
+                  api.confirm({
+                      title: '警告',
+                      msg: '确定取消收藏',
+                      buttons: ['确定', '取消']
+                  }, function(ret, err) {
+                      if (ret.buttonIndex == 1) {
+                          $ku.albumSub({t:2, id:id,timestamp:timestamp}, function(ret, err) {
+                              if (ret.code == 200) {
+                                  api.toast({
+                                      msg: '取消成功',
+                                      duration: 2000,
+                                      location: 'bottom'
+                                  });
+                                  app.followed=false
+
+                              }
+                          })
+                      }
+                  });
+              } else {
+                  $ku.albumSub({t:1, id:id,timestamp:timestamp}, function(ret, err) {
+                      if (ret.code) {
+                        app.followed=true
+                          api.toast({
+                              msg: '收藏成功',
+                              duration: 2000,
+                              location: 'bottom'
+                          });
+
+                      }
+                  })
+              }
+
+            },
+            openmenu(id, aid, data) {
+                var dialogBox = api.require('dialogBox');
+                dialogBox.actionMenu({
+                    rect: {
+                        h: 150
+                    },
+                    texts: {
+                        cancel: '取消'
+                    },
+                    items: [{
+                        text: '收藏',
+                        icon: 'widget://html/music/image/musiclist/musiclisttool01.png'
+                    }, {
+                        text: '歌手',
+                        icon: 'widget://html/music/image/musiclist/musiclisttool04.png'
+                    }, {
+                        text: '添加到歌单',
+                        icon: 'widget://image/plus.png'
+                    }],
+                    styles: {
+                        bg: '#FFF',
+                        column: 3,
+                        itemText: {
+                            color: '#000',
+                            size: 12,
+                            marginT: 8
+                        },
+                        itemIcon: {
+                            size: 40
+                        },
+                        cancel: {
+                            bg: '#ff0000',
+                            color: '#fff',
+                            h: 44,
+                            size: 14
+                        }
+                    },
+                    tapClose: true
+                }, function(ret) {
+                    if (ret.eventType == 'cancel') {
+                        dialogBox.close({
+                            dialogName: 'actionMenu'
+                        });
+
+                    }
+                    switch (ret.index) {
+                        case 0:
+                            likeSong(id)
+                            dialogBox.close({
+                                dialogName: 'tips'
+                            });
+                            break;
+                        case 1:
+                            openart(aid)
+                            break;
+
+                        case 2:
+                            openMyGeDan(id)
+                            break;
+                        case 3:
+                            // app.openWebView()
+                            break;
+                        default:
+
+                    }
+                });
+            }
+        }
+    })
+</script>
+
+</html>

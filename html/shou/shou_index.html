@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        .bgg {
+            background-image: linear-gradient( 135deg, #FFAA85 10%, #B3315F 100%);
+            background-position: right bottom, left top;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="H-header bgg" id="header">
+        <span tapmode="" onclick="goback1();" class="H-icon H-position-relative H-display-inline-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-left-5 H-z-index-100"><i class="H-iconfont H-icon-arrow-left H-font-size-18 H-vertical-middle"></i><label class="H-display-block H-vertical-middle H-font-size-15">返回</label></span>
+        <div id="title" class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent">
+            收藏
+        </div>
+        <span id="shan" onclick="openPlayer()" class="H-icon H-position-relative H-display-inline-block H-vertical-middle H-theme-font-color-white H-padding-horizontal-right-10 H-z-index-100 " style="float:right"></span>
+    </header>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var NVNavigationBar = api.require('NVNavigationBar');
+        var header = $api.byId('header');
+        $api.fixStatusBar(header);
+        var headerPos = $api.offset(header);
+        api.execScript({
+          name: 'index',
+          script: 'app.showfloatModule();'
+        });
+        api.addEventListener({
+          name: 'keyback'
+        }, function(ret, err) {
+          goback1()
+        });
+        api.addEventListener({
+            name: "per"
+        }, function(ret) {
+            if (ret) {
+                $api.html($api.byId('shan'), '<img src="../../image/loading.svg" style="height:30px" alt="">');
+
+            } else {
+                $api.html($api.byId('shan'), '');
+            }
+
+        });
+        NVNavigationBar.open({
+            rect: {
+                x: 0,
+                y: headerPos.h,
+                w: api.frameWidth,
+                h: 42
+            },
+            styles: {
+                orientation: 'horizontal',
+                bg: '#fff',
+                bgAlpha: 1,
+                font: {
+                    size: 14,
+                    sizeSelected: 18,
+                    color: '#657B83',
+                    colorSelected: '#ff0000',
+                    alpha: 1
+                },
+                itemSize: {
+                    w: api.winWidth / 5,
+                    h: 44
+                }
+            },
+            items: [{
+                title: '歌单',
+                bg: '#fff',
+                bgSelected: '#fff'
+            }, {
+                title: '歌手',
+                bg: '#fff',
+                bgSelected: '#fff'
+            }, {
+                title: '专辑',
+                bg: '#fff',
+                bgSelected: '#fff'
+            }, {
+                title: '视频',
+                bg: '#fff',
+                bgSelected: '#fff'
+            }, {
+                title: '用户',
+                bg: '#fff',
+                bgSelected: '#fff'
+            }],
+            selectedIndex: 0,
+            fixedOn: api.frameName,
+            id: 'first'
+        }, function(ret, err) {
+            api.setFrameGroupIndex({
+                name: 'group3',
+                index: ret.index
+            });
+        });
+
+
+        api.openFrameGroup({
+            name: 'group3',
+            background: '#fff',
+            scrollEnabled: true,
+            rect: {
+                x: 0,
+                y: headerPos.h + 42,
+                w: 'auto',
+                h: 'auto'
+            },
+            index: 0,
+            frames: [{
+                name: 'gedan_frame123',
+                url: 'gedan.html',
+                bgColor: '#fff'
+            }, {
+                name: 'artists_frame',
+                url: 'artists_frame.html',
+                bgColor: '#fff'
+            }, {
+                name: 'albumSub_frame',
+                url: 'albumlist.html',
+                bgColor: '#fff'
+            }, {
+                name: 'mvlist123',
+                url: 'mvlist.html',
+                bgColor: '#fff'
+            }, {
+                name: 'per_frame123',
+                url: 'per_frame.html',
+                bgColor: '#fff'
+            }]
+        }, function(ret, err) {
+            if (ret) {
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.setSelected({
+                    id: 'first',
+                    index: ret.index,
+                    selected: true
+                }, function(ret) {
+                    //  alert(JSON.stringify(ret));x
+                });
+                //  alert( JSON.stringify( ret ) );
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+
+    };
+
+    function openPlayer() {
+
+        api.execScript({
+            name: 'index',
+            script: 'app.openPlayer();'
+        });
+
+    }
+</script>
+
+</html>

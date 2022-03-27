@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+
+    <style>
+    html,body {
+      background-color: #fff;
+    }
+    </style>
+</head>
+
+<body>
+  <div id="app">
+      <div  class="H-header   H-display-block H-theme-background-color-white" id="footbar">
+          <span id="footer">
+        <span class="H-icon H-position-relative H-center-all H-display-inline-block H-vertical-middle H-theme-font-color-white   H-z-index-100"><img id="imgg" src="../../image/loading.gif" style="width: 44px;height: 44px;" alt=""></span>
+
+          </span>
+      </div>
+  </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        before = 0
+        getdata()
+   };
+
+    function getdata() {
+
+        var params = {
+            before:before,
+            uid:$api.getStorage('userinfo').userId
+        }
+        $ku.GetMsgComments(params, function(ret, err) {
+            var data = ret.comments
+            var data1 = []
+
+            for (var i = 0; i < data.length; i++) {
+                var info=data[i]
+                var list = {}
+                list.fromUserId=info.user.userId
+                list.title=info.user.nickname+' 评论:'+info.content
+                list.subTitle = '   '+info.beRepliedContent
+                list.id = info.id
+                list.time = info.time
+
+                list.remark = dateFormat(info.time)
+                list.imgPath = imageCache(info.user.avatarUrl + '?param=100y100'),
+                    data1[i] = list
+            }
+            initList(data1)
+        })
+    }
+
+    function initList(data) {
+        var UIListView = api.require('UIListView');
+        UIListView.open({
+            rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.frameHeight
+            },
+            data: data,
+            styles: {
+                borderColor: '#f1ecec',
+                item: {
+                    bgColor: '#FFF',
+                    activeBgColor: '#F5F5F5',
+                    height: 55.0,
+                    imgWidth: 40,
+                    imgHeight: 40,
+                    imgCorner: 20,
+                    placeholderImg: '',
+                    titleSize: 12.0,
+                    titleColor: '#000',
+                    subTitleSize: 12.0,
+                    subTitleColor: '#000',
+                    remarkColor: '#000',
+                    remarkSize: 10,
+                    remarkIconWidth: 30
+                }
+            },
+            fixedOn: api.frameName
+        }, function(ret, err) {
+            if (ret) {
+              $api.addCls($api.byId('app'), 'H-display-none');
+              if(ret.eventType=='clickImg'||ret.eventType=='clickContent'){
+
+                openPerCenter(data[ret.index].fromUserId)
+              }
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+        var UIListView = api.require('UIListView');
+        UIListView.setRefreshFooter({
+            loadingImg: 'widget://res/UIListView_arrow.png',
+            bgColor: '#F5F5F5',
+            textColor: '#8E8E8E',
+            textUp: '上拉加载更多...',
+            textDown: '松开开始加载...',
+            showTime: true
+        }, function(ret, err) {
+            if (ret) {
+                before++
+                getMore()
+            } else {
+                // alert(JSON.stringify(err));
+            }
+        });
+    }
+
+    function getMore() {
+        var UIListView = api.require('UIListView');
+        UIListView.getCount(function(ret) {
+            var index = ret.count - 1
+            UIListView.getDataByIndex({
+                index: index
+            }, function(ret, err) {
+
+                if (ret) {
+                    var params = {
+                        before: ret.data.time,
+                        uid:$api.getStorage('userinfo').userId
+                    }
+                    $ku.GetMsgComments(params, function(ret, err) {
+
+                        if (ret.more) {
+                          var data = ret.comments
+                          var data1 = []
+
+                          for (var i = 0; i < data.length; i++) {
+                              var info=data[i]
+                              var list = {}
+                              list.title=info.user.nickname+' 评论:'+info.content
+                              list.subTitle = '   '+info.beRepliedContent
+                              list.id = info.id
+                              list.time = info.time
+
+                              list.remark = dateFormat(info.time)
+                              list.imgPath = imageCache(info.user.avatarUrl + '?param=100y100'),
+                                  data1[i] = list
+                          }
+
+                            var UIListView = api.require('UIListView');
+                            UIListView.appendData({
+                                data: data1
+                            }, function(ret, err) {
+                                if (ret) {
+                                    // alert(JSON.stringify(ret));
+                                } else {
+                                    alert(JSON.stringify(err));
+                                }
+                            });
+
+                        } else {
+                            var UIListView = api.require('UIListView');
+                            UIListView.appendData({
+
+                            }, function(ret, err) {
+                                if (ret) {
+                                    // alert(JSON.stringify(ret));
+                                } else {
+                                    alert(JSON.stringify(err));
+                                }
+                            });
+                            api.toast({
+                                msg: '没有更多了',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+
+                        }
+                    })
+                }
+            });
+        });
+    }
+
+
+</script>
+
+</html>

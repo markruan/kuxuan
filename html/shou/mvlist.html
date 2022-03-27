@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        body {}
+    </style>
+</head>
+
+<body>
+   <div id="empty"></div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    ;
+    apiready = function() {
+         $ku.getmvSub(function(ret,err){
+
+                var res = ret.data
+                
+            if (res.length) {
+                var data = []
+                for (var i = 0; i < res.length; i++) {
+                    var list = {}
+                    list.goodsName = res[i].title+'-'+res[i].creator[0].userName
+                    list.type=res[i].type
+                    list.vid = res[i].vid
+                    list.goodsNameSize = 10
+                    list.imgPath = imageCache(res[i].coverUrl + '?param=320y180'),
+                    data[i] = list
+                }
+                initPlayList(data)
+            } else {
+              str1 = '<div class=""><p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">暂无数据...</p><div class="H-padding-vertical-bottom-10"></div></div>';
+
+              $api.html($api.byId('empty'), str1);
+            }
+        });
+
+    };
+
+
+    function initPlayList(data) {
+        var UIListGoods = api.require('UIListGoods');
+        UIListGoods.open({
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: api.winWidth,
+                    h: api.frameHeight
+
+                },
+                data: data,
+                styles: {
+                    item: {
+                        bgColor: '#FFFFFF',
+                        goodsNameSize: 9,
+        								height: ((api.winWidth - 20) / 2 - 10) / 1.777 + 18,
+        								imgWidth: (api.winWidth - 20) / 2 - 10, //（可选项）数字类型；列表项配图的宽度；默认：列表项的高度减去10px
+        								imgHeight: ((api.winWidth - 20) / 2 - 10) / 1.777,
+        								imgMarginTop: 0,
+
+                    }
+                },
+
+                fixedOn: api.frameName,
+            },
+            function(ret, err) {
+                stoploading();
+                if (ret.eventType == 'clickContent') {
+                  var vid = data[ret.index].vid
+                 console.log(data[ret.index].vid);
+                  if(data[ret.index].type==0){
+                    openMv(vid)
+                  }else{
+                    openVideo(vid)
+                  }
+
+                } else {
+                    // alert(JSON.stringify(err));
+                }
+            });
+    }
+</script>
+
+</html>

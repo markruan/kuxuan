@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>Hui</title>
+    <link href="../../css/Hui.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+</head>
+<style media="screen">
+    html,
+    body {
+        background-color: white;
+    }
+</style>
+
+<body class="H-theme-background-color-white">
+    <div id="app">
+        <div v-if="pageIs">
+        <div class="H-theme-background-color-white" style="margin-top:300px">
+            <div class="H-flexbox-horizontal H-theme-background-color-white background H-border-vertical-bottom-after H-clear-both" style="paddingTop:15px">
+                <div class="H-padding-vertical-both-10 H-box-sizing-border-box"><img id="imgg" :src="mvinfo.cover+'?param=120y70'" alt="" title="" class="H-display-block H-margin-horizontal-left-10 H-paper-3 " style="width:120px; height: 70px;"></div>
+                <div class="H-flex-item H-padding-10 H-position-relative H-box-sizing-border-box" style="height: 100px; ">
+                    <span class="H-flex-item  H-font-size-14  H-text-show-row-1" id="title">{{mvinfo.name}}</span>
+                    <span class="H-flex-item  H-font-size-12  " id="artistName">{{mvinfo.artistName}}</span>
+                    <p class="H-font-size-10 H-theme-font-color-999 H-position-absolute H-z-index-10 H-margin-0" style=" left: 10px; right: 10px;">
+                        <span class="H-flex-item H-text-show-row-2">{{mvinfo.briefDesc||mvinfo.desc}}</span>
+                    </p>
+                    <!-- <p class="H-font-size-10 H-theme-font-color-999 H-position-absolute H-z-index-10 H-margin-0" style="bottom: 10px; left: 10px; right: 10px;"></p> -->
+                </div>
+            </div>
+        </div>
+
+        <div class="H-channel-title H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after" v-show="similist.length">
+            <div class="H-channel-line H-theme-background-color-red H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1">猜你喜欢</div>
+        </div>
+        <div id="similist" class="H-clear-both H-width-100-percent H-display-table H-box-sizing-border-box H-padding-horizontal-left-10">
+
+            <div class="list H-display-table-cell H-float-left  H-box-sizing-border-box H-width-avg-2 H-padding-horizontal-right-10  H-margin-vertical-bottom-5" tapmode @click="openmv(item.id)" v-for="(item,i) in similist" v-if="i<4">
+                <img src1="../../image/default.jpg" :src="item.cover + '?param=267y151'" class=" animated fadeIn H-width-100-percent H-display-block H-paper-3 " style="border-radius: 5px;height:110px;">
+                <div class="H-text-align-center H-font-size-12 H-padding-vertical-top-5">{{item.name.substring(0, 12)}}</div>
+                <div class="H-text-align-center H-font-size-10 H-padding-vertical-top-2">{{item.artistName.substring(0, 18)}}</div>
+            </div>
+        </div>
+        <div class="H-channel-title H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after" v-show="hotCom.length">
+            <div class="H-channel-line H-theme-background-color-red H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1">热门评论</div>
+        </div>
+        <div class="hotcom">
+            <div class="H-flexbox-horizontal H-theme-background-color-white H-border-vertical-bottom-after" v-for="(item,i) in hotCom">
+                <div class="H-padding-vertical-both-5"><img :src="item.user.avatarUrl+'?param=80y80'" alt="" title="" class="imgCache H-display-block H-margin-horizontal-left-10 H-border-radius-circle" style="width: 30px; height: 30px;" /></div>
+                <div class="H-flex-item H-margin-vertical-both-8 H-margin-10">
+                    <div class="H-theme-font-color-999 H-font-size-14 H-flexbox-horizontal H-text-horizontal-left H-box-sizing-border-box">
+                        <span class="H-display-block H-flex-item H-text-align-left H-font-size-14 H-theme-font-color1">{{item.user.nickname}}</span>
+                        <span class="H-display-block H-flex-item H-text-align-right H-theme-font-color-999 H-font-size-12" id="times"></span></div>
+                    <div class="H-font-size-12  H-margin-vertical-top-2 H-font-size-12" id="address">{{item.content}}</div>
+                    <div class="H-font-size-10 H-theme-font-color-999 H-text-show-row-1 H-margin-vertical-top-2 H-font-size-12" id="address1">{{UnixToDate(item.time)}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="H-channel-title H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after" v-show="newCom.length">
+            <div class="H-channel-line H-theme-background-color-red H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1">最新评论</div>
+        </div>
+        <div class="newcom">
+            <div class="H-flexbox-horizontal H-theme-background-color-white H-border-vertical-bottom-after" v-for="(item,i) in newCom">
+                <div class="H-padding-vertical-both-5"><img :src="item.user.avatarUrl+'?param=80y80'" alt="" title="" class="imgCache H-display-block H-margin-horizontal-left-10 H-border-radius-circle" style="width: 30px; height: 30px;" /></div>
+                <div class="H-flex-item H-margin-vertical-both-8 H-margin-10">
+                    <div class="H-theme-font-color-999 H-font-size-14 H-flexbox-horizontal H-text-horizontal-left H-box-sizing-border-box">
+                        <span class="H-display-block H-flex-item H-text-align-left H-font-size-14 H-theme-font-color1">{{item.user.nickname}}</span>
+                        <span class="H-display-block H-flex-item H-text-align-right H-theme-font-color-999 H-font-size-12" id="times"></span></div>
+                    <div class="H-font-size-12  H-margin-vertical-top-2 H-font-size-12" id="address">{{item.content}}</div>
+                    <div class="H-font-size-10 H-theme-font-color-999 H-text-show-row-1 H-margin-vertical-top-2 H-font-size-12" id="address1">{{UnixToDate(item.time)}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+   </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<!-- <script type="text/javascript" src="../../script/music.js"></script>
+<script type="text/javascript" src="../../script/jquery/jquery.min.js"></script> -->
+
+
+<script type="text/javascript">
+    apiready = function() {
+        var moviePlayer = api.require('moviePlayer');
+        var vid = api.pageParam.vid
+        app.openmv(vid)
+        moviePlayer.addEventListener(function(ret) {
+            if (ret && ret.eventType == 'back') {
+                api.closeWin();
+
+            }
+        });
+        api.addEventListener({
+            name: 'mvframe'
+        }, function(ret, err){
+            if( ret ){
+              app.pageIs=true
+            }else{
+                //  alert( JSON.stringify( err ) );
+            }
+        });
+
+    }
+
+    var app = new Vue({
+        el: "#app",
+        data: {
+            similist: [],
+            mvinfo: {},
+            hotCom: [],
+            newCom: [],
+            pageIs:false
+
+        },
+        methods: {
+            isfull() {
+                var moviePlayer = api.require('moviePlayer');
+                moviePlayer.isFullscreen(function(ret) {
+                    if (!ret.state) {
+                        api.closeWin();
+
+                    } else {
+                        moviePlayer.onBack(function() {
+                            alert("onBack");
+                        });
+                    }
+                });
+            },
+            openmv(vid) {
+
+                api.readFile({
+                    path: api.cacheDir + '/mv/' + vid + '.json'
+                }, function(ret, err) {
+                    if (ret.status) {
+                        var mdata = $api.strToJson(ret.data);
+                        app.mvinfo = mdata.data
+                        $ku.getMvUrl({id:vid},function(ret,err){
+                           if(ret.code==200){
+                             app.initPlayer(ret.data.url, app.mvinfo.name)
+                           }
+                        })
+
+                    } else {
+                        $ku.getmv({
+                            mvid: vid
+                        }, function(ret, err) {
+                            if (ret) {
+                                api.writeFile({
+                                    path: api.cacheDir + '/mv/' + vid + '.json',
+                                    data: ret
+                                }, function(ret, err) {
+
+                                });
+                                app.mvinfo = ret.data
+                                $ku.getMvUrl({id:vid},function(ret,err){
+                                   if(ret.code==200){
+                                     app.initPlayer(ret.data.url, app.mvinfo.name)
+                                   }
+                                })
+
+
+                            } else {
+                                api.toast({
+                                    msg: err.msg,
+                                    duration: 2000,
+                                    location: 'bottom'
+                                });
+                            }
+                        });
+                    }
+                });
+                app.getsimi(vid)
+                app.getMvCom(vid)
+                app.commm(vid)
+            },
+            initPlayer(url, title) {
+                // console.log(url);
+                var moviePlayer = api.require('moviePlayer');
+                moviePlayer.close();
+                moviePlayer.open({
+                    texts: {
+                        title: title
+                    },
+                    rect: {
+                        x: 0,
+                        y: 0,
+                        w: api.frameWidth,
+                        h: 300
+                    },
+                    styles: {
+                        head: {
+                            bg: 'rgba(0,0,0,0.5)',
+                            // text:'成都'，
+                            height: 44,
+                            y: 20,
+                            title: {
+                                size: 16,
+                                color: '#fff',
+                                width: 340,
+                                leftMargin: 10
+                            },
+
+                            backSize: 22,
+                            backImg: 'widget://image/back.png',
+                            customButtons: [{
+                                w: 30,
+                                h: 30,
+                                rightMagin: 10,
+                                img: 'widget://image/image/collect.png',
+                                imgSelected: 'fs://image/collectSelected.png',
+                            }]
+                        },
+                        foot: {
+                            bg: 'rgba(0,0,0,0.5)',
+                            height: 44,
+                            palyBtn: {
+                                size: 20,
+                                playImg: 'widget://image/play.png',
+                                pauseImg: 'widget://image/pause.png',
+                                marginLeft: 5
+                            },
+                            currentTimeLabel: {
+                                textSize: 14,
+                                textColor: "#FFF",
+                                textWidth: 43,
+                                marginLeft: 5
+                            },
+                            seekBar: {
+                                sliderImg: 'widget://image/circle.png',
+                                sliderW: 20,
+                                sliderH: 20,
+                                progressColor: '#696969',
+                                progressSelected: 'rgba(183, 52, 52, 0.79)',
+                                marginLeft: 10,
+                                marginRight: 10
+                            },
+                            totalTimeLabel: {
+                                textSize: 14,
+                                textColor: "#FFF",
+                                textWidth: 43,
+                                marginRight: 5
+                            },
+                            fullscreenBtn: {
+                                size: 20,
+                                verticalImg: 'widget://image/vertical.png',
+                                horizontalImg: 'widget://image/horizontal.png',
+                            }
+                        }
+                    },
+                    path: url,
+                    coverImg: 'widget://image/xia1.png',
+                    autoPlay: true,
+                    // fixedOn:api.frameName
+                }, function(ret, err) {
+                    if (ret) {
+                        // alert(JSON.stringify(ret));
+                    } else {
+                        // alert(JSON.stringify(err));
+                    }
+
+                });
+            },
+
+            getsimi(mvid) {
+                $ku.simi({
+                    mvid: mvid
+                }, function(ret, err) {
+                    app.similist = ret.mvs;
+                })
+            },
+            getMvCom(mvid) {
+                $ku.getCom({
+                    id: mvid,
+                    comtype: 'mv'
+                }, function(ret, err) {
+                    app.hotCom = ret.hotComments;
+                    app.newCom = ret.comments
+                })
+            },
+
+            commm(vid) {
+                //获取用户信息
+                var obj = api.require('inputField');
+                var type = 1
+
+                obj.open({
+                    bgColor: '#fff',
+                    lineColor: '#ccc',
+                    fileBgColor: '#ffffff',
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    // sendImg: 'widget://res/send_bg.png',
+                    sendBtn: {
+                        bg: '#B3315F',
+                        sendH: 30,
+                        title: '发送'
+                    },
+                    placeholder: '千头万绪,落笔汇成一句评论'
+                }, function(ret, err) {
+
+                    var params = {
+                        t: 1,
+                        type: type,
+                        id: vid,
+                        content: ret.msg,
+                        timestamp: timestamp
+                    }
+                    if (ret.msg && panduan()) {
+                        $ku.comment(params, function(ret, err) {
+                            var data = ret
+                                // console.log(JSON.stringify(data));
+                            if (data.code == 200) {
+                                app.getMvCom(vid)
+                                api.toast({
+                                    msg: "评论成功",
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            } else {
+
+                                api.toast({
+                                    msg: data.responseJSON.msg,
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            }
+                        })
+                    } else {
+                        api.alert({
+                            msg: '输入不能为空!!'
+                        }, function(ret, err) {});
+                    }
+                });
+            }
+        }
+    })
+</script>
+
+</html>

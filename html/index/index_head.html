@@ -1,0 +1,1083 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <link href="../../css/iconfont.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+    <style type="text/css">
+        .bgg {
+            background-image: linear-gradient(135deg, #FFAA85 10%, #B3315F 100%);
+            background-position: right bottom, left top;
+        }
+
+        #footer {
+            position: fixed;
+            bottom: 0px;
+        }
+
+            /* {
+            height: 52px;
+            border-top: 3px solid #e6e6e6;
+            -webkit-background-size: cover;
+            background-size: cover;
+            position: relative;
+            width: 100%;
+        } */
+
+        span {
+            position: absolute;
+            white-space: nowrap;
+            background-repeat: no-repeat;
+            background-position: center;
+            -webkit-background-size: contain;
+            background-size: contain;
+        }
+
+        .radio.active {
+            background-color: rgba(0, 0, 0, .2);
+        }
+
+        .radio .inner {
+            padding-left: 62px;
+            max-width: 60%;
+            color: #fff;
+            font-size: 14px;
+            line-height: 50px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            background: url(../../image/scheduleliving2.png) no-repeat 48px center;
+            -webkit-background-size: 25px 13px;
+            background-size: 25px 13px;
+        }
+
+        .menu,
+        .play,
+        .xin,
+        .pause,
+        .buffer,
+        .next {
+            width: 36px;
+            height: 36px;
+            top: 6px;
+        }
+
+        .menu {
+            left: 10px;
+            /*background-image: url(../../image/miniplay_menu.png);*/
+        }
+
+        .menu.active {
+            /*background-image: url(../../image/miniplay_menu_s.png);*/
+        }
+
+        .play {
+            right: 56px;
+            background-image: url(../../image/miniplay_play.png);
+        }
+
+        .xin {
+            right: 10px;
+            background-image: url(../../image/ic_channel_addfav.png);
+        }
+
+        .xin.active {
+            right: 10px;
+            background-image: url(../../image/ic_play_faved.png);
+        }
+
+        .play.active {
+            background-image: url(../../image/miniplay_play_s.png);
+        }
+
+        .pause {
+            right: 56px;
+            background-image: url(../../image/miniplay_pause.png);
+        }
+
+        .pause.active {
+            background-image: url(../../image/miniplay_pause_s.png);
+        }
+
+        .buffer {
+            background-image: none;
+            right: 56px;
+        }
+
+        @-webkit-keyframes rotate {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .buffer:before {
+            content: '';
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            background: url(../../image/miniplay_buffer.png) no-repeat center;
+            -webkit-background-size: contain;
+            background-size: contain;
+            -webkit-animation: rotate 4s linear infinite;
+            animation: rotate 4s linear infinite;
+        }
+
+        .next {
+            right: 10px;
+            background-image: url(../../image/miniplay_next.png);
+        }
+
+        .next.active {
+            background-image: url(../../image/miniplay_next_s.png);
+        }
+
+        .minbar_img {
+            width: 42px;
+            height: 42px;
+            border-radius: 21px;
+        }
+
+        .xuanzhuan {
+            -webkit-animation: circle 45s infinite linear;
+            /*匀速 循环*/
+        }
+
+        @-webkit-keyframes circle {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="">
+    <div id="app" v-clock>
+        <header class="H-header  bgg H-border-vertical-bottom-after" id="header">
+            <span tapmode="" onclick="H.openSlidPane();"
+                class="H-icon H-position-relative H-display-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-both-10 H-z-index-1000"><i
+                    class="H-iconfont H-icon-more-menu H-font-size-18 H-vertical-middle"></i></span>
+            <div
+                class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent ">
+                <div class="H-search H-flexbox-horizontal H-box-sizing-border-box  H-theme-background-color-transparent H-border-radius-3 H-overflow-hidden"
+                    style="width: 70%; height: 35px">
+                    <input tapmode @click="openS()" name="keyword" id="search" placeholder="Search...."
+                        class="H-border-none H-theme-background-color-transparent H-flex-item H-font-size-16 H-padding-horizontal-both-10 H-padding-vertical-both-2 H-vertical-align-middle H-theme-border-color-ccc H-theme-font-color-white"
+                        style="border-width: 0 0 1px  0; ">
+                </div>
+            </div>
+            <span
+                class="H-icon H-position-relative H-display-block H-float-right H-vertical-middle H-theme-font-color-white H-padding-horizontal-both-5 H-z-index-1000"
+                tapmode @click="openS()"><i
+                    class="H-iconfont H-icon-search H-font-size-18 H-vertical-middle H-margin-horizontal-right-15"></i></span>
+            <div class="H-flexbox-horizontal H-theme-background-color-white" id="tag">
+                <div tapmode="" @click="setPage(0, '../../html/page/page_frm.html');"
+                    class="H-flex-item H-center-all H-theme-font-color-red H-padding-vertical-both-10 H-theme-border-color-white  H-font-size-16 H-theme-border-color-52ace5 H-theme-font-color-52ace5 H-theme-border-color-red H-theme-font-color-red"
+                    style="border-width: 0 0 1px  0">
+                    精选
+                </div>
+                <div tapmode="" @click="setPage(1, '../../html/quan/frames0.html');"
+                    class="H-flex-item H-center-all H-theme-font-color-666 H-padding-vertical-both-10 H-theme-border-color-white  H-font-size-16"
+                    style="border-width: 0 0 1px  0">
+                    歌单
+                </div>
+            </div>
+        </header>
+        <div class="H-main H-flex-item"></div>
+        <div class="H-progress H-theme-background-color-eee H-width-100-percent H-border-radius-3 H-line-height-0 H-overflow-hidden"
+            style="height: 1px;position: fixed;bottom: 55px;">
+            <div class="H-height-100-percent H-theme-background-color1 H-paper-2 " :style="{width:per+'%'} "></div>
+        </div>
+        <footer class="H-footer H-flexbox-horizontal bgg H-border-vertical-top-after" id="footer">
+            <div id="miniplayer">
+                <span class="menu " tapmode="active" @click="openPlayer()">
+                    <img :src="music_img_min" alt=" " class="minbar_img H-paper-2 " :class="isPlaying?'xuanzhuan':''">
+                </span>
+                <div id="str6" class="radio" tapmode="active">
+                    <!--onclick="openRadioDetail()"openPlayer()-->
+                    <div tapmode @click="openPlayer()" class="inner" id="title"
+                        style="overflow-x:hidden;white-space:nowrap;width: 250px;">
+                        {{songName}}-{{artists}}
+                    </div>
+                </div>
+                <span id="pp" :class="isPlaying?'pause':'play'" tapmode="focus" data-click="0" @click="switchmusic()"
+                    data-mp3=""></span>
+                <span class="next" tapmode="active" @click="playNext"></span>
+            </div>
+        </footer>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/H.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+    var playid = $api.byId('pp')
+    var music, audioCover
+    H.ready(function () {
+
+        // uiloading(null, true)
+        uiloading()
+        
+        H.openFrameGroupNavOrFoot(function (ret, err) {
+            
+            if (ret.index == 1 || ret.index == 2) {
+                app.setStyle(1);
+            } else {
+                app.setStyle(0);
+            }
+            api.addEventListener({
+                name: 'updateCat'
+            }, function (ret, err) {
+                app.updateCat()
+            });
+
+            if (ret.index == 0) {
+                // stoploading()
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.hide({
+                    id: 'first'
+                });
+                // stoploading()
+            } else if (ret.index == 1) {
+                api.setFrameGroupAttr({
+                    name: 'group2',
+                    hidden: true,
+                    scrollEnabled: true,
+
+                });
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.show({
+                    id: 'first'
+                });
+                NVNavigationBar.setSelected({
+                    id: 'first',
+                    index: 0,
+                    selected: true
+                }, function (ret) {
+
+                });
+
+            } else if (ret.index == 2) {
+
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.show({
+                    id: 'first'
+                });
+                NVNavigationBar.setSelected({
+                    id: 'first',
+                    index: 1,
+                    selected: true
+                }, function (ret) {
+
+                });
+
+                api.setFrameGroupAttr({
+                    name: 'group2',
+                    hidden: false,
+                    scrollEnabled: true,
+
+                });
+                api.setFrameGroupIndex({
+                    name: 'group2',
+                    index: 1,
+                    scroll: true
+                });
+
+            }
+        }, "groups", [{
+            url: '../../html/page/selected.html',
+            name: 'kuxuan'
+        }, {
+            url: '../../html/quan/frames0.html',
+            name: "frame2"
+        }, {
+            url: '../../html/quan/jingxuan.html',
+            name: 'quanzi'
+        }], 0, "#header", "#footer", {
+                bounces: false,
+                preload: 2
+            });
+        H.dblclickToCloseApp();
+        // 
+
+        // fnaddEventListener()
+
+        var fs = api.require('fs');
+        fs.createDir({
+            path: 'fs://cache'
+        }, function (ret, err) { });
+        app.setCat() //初始化歌单分类
+        app.initmlist() //初始化播放BAR,还没弄好
+        $api.setStorage('isPlaying', false); //初始化播放状态
+        isOnLineStatus(function (is_true, line_type) {
+            if (is_true) {
+                if (line_type == '3g' || line_type == '2g') {
+                    app.pause()
+                    api.toast({
+                        msg: '网络信号不稳定，请稍后再试',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+
+                }
+            }
+        })
+
+        // 检测登录状态
+        $ku.loginStatus(function (res, err) {
+            // console.log(JSON.stringify(res));
+            if (res.code != 200) {
+                api.toast({
+                    msg: '请重新登录',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+
+            }
+        })
+        api.setWinAttr({
+            bounces: false
+        });
+        var audioPlayer = api.require('audioPlayer');
+        audioPlayer.addEventListener({
+            name: 'playing'
+        }, function (ret, err) {
+            console.log(JSON.stringify(ret));
+            app.cur = ret.current
+            var percent = (app.cur / app.duration) * 100;
+            app.per = Math.round(percent);
+            app.current = formatSeconds(app.cur);
+            app.audioCover()
+            app.cur = ret.current
+            var percent = (app.cur / app.duration) * 100;
+            app.per = Math.round(percent);
+
+            app.current = formatSeconds(app.cur);
+
+            api.sendEvent({
+                name: 'per',
+                extra: {
+                    per: app.per,
+                    current: app.current
+                }
+            });
+
+
+        });
+
+        api.addEventListener({
+            name: 'replaying'
+        }, function (ret, err) {
+            $api.attr(playid, 'data-click', 0);
+        });
+
+        api.addEventListener({
+            name: 'paused'
+        }, function (ret, err) {
+            app.pause()
+            app.isPlaying = false
+        });
+
+
+        api.addEventListener({
+            name: 'noCopyRight'
+        }, function (ret, err) {
+            if (ret) {
+                app.playNext()
+                api.toast({
+                    msg: '暂无版权',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+            }
+        });
+
+        api.addEventListener({
+            name: 'seekTo'
+        }, function (ret, err) {
+            var time = ret.value.time
+            app.seekTo(time)
+        });
+        // 断网了
+        api.addEventListener({
+            name: 'offline'
+        }, function (ret, err) {
+            api.toast({
+                msg: '掉线了',
+                duration: 2000,
+                location: 'bottom'
+            });
+        });
+        // 监听播放状态
+        var audio = api.require('audioPlayer');
+
+        // 已连接到网络
+        api.addEventListener({
+            name: 'online'
+        }, function (ret, err) {
+            api.toast({
+                msg: '连上网络了',
+                duration: 2000,
+                location: 'bottom'
+            });
+        });
+        var phoneListener = api.require('phoneListener');
+        phoneListener.callStateListener({
+            enable: true
+        }, function (ret) {
+            if (ret) {
+                api.sendEvent({
+                    name: 'paused',
+                });
+            }
+        });
+
+        api.setFrameClient({
+            frameName: 'kuxuan'
+        }, function (ret, err) {
+
+
+
+            switch (ret.state) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+
+                    // stoploading()
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                default:
+                    break;
+            }
+        });
+
+    });
+
+    //  重写播放模块
+    var app = new Vue({
+        el: "#app",
+        data: {
+            songName: 'Valder Fields',
+            artists: 'Tamas Wells',
+            songid: '2001320',
+            music_mp3: '',
+            isPlaying: false,
+            state: '',
+            status: true,
+            cur: '',
+            per: 0,
+            current: '',
+            music_imgurl: '',
+            music_thumb: '',
+            duration: '',
+            songdatalist: '',
+            isfirstopen: true,
+            isclick: true,
+            music_img_min: 'http://p1.music.126.net/XbQhfWII58akaVQ6_xECEw==/6635552673830427.jpg?param=130y130',
+            err: false,
+            catlist: [],
+            index: '',
+            isopen: true
+        },
+        watch: {
+            isPlaying(curVal, oldVal) {
+                // console.log(curVal, oldVal);　　　　　　　　
+            },
+            status(curVal, oldVal) {
+                console.log(JSON.stringify(curVal));
+
+            },
+            music_imgurl(curVal, oldVal) {
+                var datetime = Number(new Date())
+                saveMlistDB(app.songid, app.songName, app.artists, app.music_img_min, datetime)
+                api.sendEvent({
+                    name: 'upDateSongInfo',
+                    extra: {
+                        songName: app.songName,
+                        artists: app.artists,
+                        songid: app.songid,
+                        music_imgurl: app.music_imgurl,
+                        duration: app.duration,
+                        music_mp3: app.music_mp3,
+                        music_thumb: app.music_thumb,
+                        music_img_min: app.music_img_min,
+                        music_dur: app.dur,
+                        index: app.index
+                    }
+                })
+            },
+            isPlaying(curVal, oldVal) {
+                // console.log(curVal);
+                var floatModule = api.require('floatModule');
+                if (curVal) {
+                    var floatModule = api.require('floatModule');
+                    floatModule.show()
+                    floatModule.changeState({
+                        state: 0
+                    })
+                } else {
+                    floatModule.changeState({
+                        state: 1
+                    })
+                }
+            }
+        },
+        methods: {
+            init: function () {
+                $ku.checkIsPlay({
+                    id: app.songid
+                }, function (ret, err) {
+                    if (ret.success) {
+                        app.startPlay()
+                        $ku.getMusicInfo({
+                            ids: app.songid
+                        }, function (ret, err) {
+
+                            if (ret.code == 200) {
+                                app.startPlay()
+                                var songDetail = ret.songs[0]
+                                app.songName = songDetail.name
+                                // app.duration=songDetail.dt
+                                app.artistsId = songDetail.ar[0].id ? songDetail.ar[0].id : songDetail.artists[0].id
+                                app.music_thumb = songDetail.al ? songDetail.al.picUrl : songDetail.album.picUrl
+                                app.music_img_min = imageCache(app.music_thumb + '?param=100y100')
+                                app.artists = songDetail.ar ? songDetail.ar[0].name : songDetail.artists[0].name
+
+                                app.music_imgurl = songDetail.al ? songDetail.al.picUrl + '?param=300y300' : songDetail.album.picUrl + '?param=300y300'
+                                api.imageCache({
+                                    url: songDetail.al ? songDetail.al.picUrl + '?param=300y300' : songDetail.album.picUrl + '?param=300y300'
+                                }, function (ret, err) {
+                                    app.audioCover()
+                                });
+                            }
+                        })
+                    } else {
+                        app.isclick = true
+                        app.playNext()
+                        api.toast({
+                            msg: "播放失败",
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+
+                    }
+                })
+            },
+            seekTo(time) {
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.setCurrent({
+                    current: time
+                });
+                // var audioStreamer = api.require('audioStreamer');
+                // audioStreamer.seekToTime({
+                //     time: time
+                // });
+            },
+            getMlistDB: function () { //首页获取播放历史列表
+                api.openFrame({
+                    name: 'page2',
+                    url: 'history.html',
+                    rect: {
+                        x: 0,
+                        y: api.winHeight - 300,
+                        w: api.winWidth,
+                        h: 300
+                    },
+                    bounces: false,
+                    bgColor: 'rgba(0,0,0,0)',
+                    vScrollBarEnabled: true,
+                    hScrollBarEnabled: true,
+                    animation: {
+                        type: "push", //动画类型（详见动画类型常量）
+                        subType: "from_bottom", //动画子类型（详见动画子类型常量）
+                        duration: 400
+                    }
+                });
+            },
+            pause: function () {
+                // var audioStreamer = api.require('audioStreamer');
+                // audioStreamer.pause();
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.pause();
+                app.isPlaying = false
+            },
+            play: function () {
+                // var audioStreamer = api.require('audioStreamer');
+                // app.startPlay();
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.play();
+                app.isPlaying = true
+            },
+            stop: function () {
+                // var audioStreamer = api.require('audioStreamer');
+                // audioStreamer.stop();
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.stop();
+            },
+            setPage: function (index, url) { //设置首页显示页面
+                app.setStyle(index);
+                H.setFrameGroupIndex("groups", index, true);
+                var NVNavigationBar = api.require('NVNavigationBar');
+                if (index == 0) {
+
+                    NVNavigationBar.hide({
+                        id: 'first'
+                    });
+                    api.setFrameGroupAttr({
+                        name: 'group2',
+                        hidden: true
+                    });
+
+                } else {
+
+                    NVNavigationBar.show({
+                        id: 'first'
+                    });
+                    api.setFrameGroupAttr({
+                        name: 'group2',
+                        hidden: true
+                    });
+
+                }
+            },
+            setStyle: function (index) { // 设置切换TAB 样式效果
+                var that = H.D("#tag div:nth-child(" + (index + 1) + ")");
+                H.addClass(that, "H-theme-border-color-red H-theme-font-color-red");
+                H.removeClass(H.siblings(that), "H-theme-border-color-red H-theme-font-color-red");
+            },
+            switchmusic: function () { // 底部控件——播放
+                if (this.isPlaying) {
+                    // 点开
+                    this.pause()
+                } else {
+                    this.init()
+                }
+            },
+            openS: function () {
+                api.openWin({
+                    name: 'search',
+                    url: '../../html/search.html',
+                    animation: {
+                        type: "fade", //动画类型（详见动画类型常量）
+                        subType: "from_right", //动画子类型（详见动画子类型常量）
+                        duration: 600 //动画过渡时间，默认300毫秒
+                    }
+                });
+            },
+            playNext: function () {
+
+                if (app.err == false) {
+
+
+                    if (app.index + 1 == app.songdatalist.length) {
+                        app.songid = app.songdatalist[0].id
+
+                        app.init()
+                        app.index = 0
+                    } else {
+                        app.songid = app.songdatalist[app.index + 1].id
+
+                        app.init()
+                        app.index = app.index + 1
+                    }
+                    //定时器
+                    // setTimeout(function() {
+                    //     app.err = false;
+                    // }, 1800);
+                }
+
+            },
+            playBack: function () {
+                if (app.index == 0) {
+                    app.songid = app.songdatalist[0].id
+                    app.init()
+                    app.index = 0
+                } else {
+                    app.songid = app.songdatalist[app.index - 1].id
+                    app.init()
+                    app.index = app.index - 1
+                }
+            },
+            initmlist() { //初始化播放BAR,还没弄好
+                var db = api.require('db');
+                db.openDatabase({
+                    name: 'history2'
+                }, function (ret, err) {
+                    if (ret.status) {
+                        db.selectSql({
+                            name: 'history2',
+                            sql: 'SELECT * FROM mlist group by mlist_id order by mlist_date desc'
+                        }, function (ret, err) {
+                            if (ret.status && ret.data.length) {
+                                app.songName = ret.data[0].mlist_name
+                                app.songid = ret.data[0].id
+                                app.artists = ret.data[0].mlist_artist
+                                app.music_img_min = ret.data[0].mlist_pic
+                                app.index = 0
+                                var dblist = []
+                                var list = ret.data
+                                for (var i = 0; i < list.length; i++) {
+                                    var arr = {}
+                                    arr.id = list[i].id
+                                    var namearr = []
+
+                                    var name1 = {
+                                        name: list[i].mlist_artist
+                                    }
+                                    namearr[0] = name1
+                                    arr.artists = namearr
+                                    arr.name = list[i].mlist_name
+                                    dblist[i] = arr
+                                }
+                                app.songdatalist = ret.data
+                                app.songid = ret.data[0].id
+                                $api.setStorage('listm', dblist);
+                            } else {
+                                app.isfirstopen = false
+                            }
+                        });
+
+                    } else {
+                        // alert(JSON.stringify(err));
+                    }
+                });
+            },
+            audioCover: function () {
+                audioCover = api.require('audioCover');
+                notify(app.songName + '-' + app.artists, app.current + '-' + formatSeconds(app.duration), 123, true)
+                api.imageCache({
+                    url: app.music_imgurl
+                }, function (ret, err) {
+                    if (ret) {
+                        app.music_imgurl = ret.url
+                        var msg = {
+                            totalTime: app.duration,
+                            cover: app.music_imgurl,
+                            progress: app.per,
+                            audio: app.songName,
+                            author: app.artists,
+                            currentTime: app.cur
+                        }
+
+                        audioCover.set(msg, function (ret, err) {
+                            if (ret.eventType == 'pause') {
+                                app.play()
+                            } else if (ret.eventType == 'next') {
+                                app.stop();
+                                app.playNext()
+                            } else if (ret.eventType == 'previous') {
+                                app.stop();
+                                app.playBack()
+                            } else if (ret.eventType == 'play') {
+                                app.pause()
+                            } else { }
+                        });
+                    } else {
+                        // alert(JSON.stringify(err));
+                    }
+                });
+            },
+            showfloatModule() {
+                var floatModule = api.require('floatModule');
+                var params = {
+                    rect: {
+                        x: api.winWidth - 110,
+                        y: api.winHeight - 115,
+                        w: 62,
+                        h: 62
+                    },
+                    state: app.isPlaying ? 0 : 1,
+                    bg: '#ff0404',
+                    // avatar:'widget://image/qq.png',
+                    avatarSize: 70,
+                    margin: {
+                        firstMargin: 3,
+                        middleMargin: -40,
+                        thridMargin: 100,
+                    }
+                };
+                floatModule.openFloat(params, function (ret) {
+                    if (ret && app.isPlaying == false) {
+                        app.play()
+                    } else {
+                        app.pause()
+                    }
+                });
+            },
+            hidefloatModule() {
+                var floatModule = api.require('floatModule');
+                floatModule.close()
+            },
+            // 设置歌单分类
+            updateCat() {
+                var menudata
+                getCache('menudata', 'list', function (ret, err) {
+                    var NVNavigationBar = api.require('NVNavigationBar');
+                    if (ret.data) {
+                        var data = $api.strToJson(ret.data)
+                        menudata = data.filter(function (s) {
+                            return s.select == true
+                        })
+                        NVNavigationBar.update({
+                            id: 'first',
+                            items: menudata,
+                        }, function (ret) {
+                            api.setFrameGroupIndex({
+                                name: 'groups',
+                                index: 0,
+                                scroll: true
+                            });
+                            api.setFrameGroupIndex({
+                                name: 'group2',
+                                index: 0,
+                                scroll: true
+                            });
+                             
+                                stoploading()
+                             
+                           
+                            // alert(JSON.stringify(ret));
+                        });
+
+                    }
+                })
+            },
+            setCat() {
+                var menudata
+                getCache('menudata', 'list', function (ret, err) {
+                    if (ret.data) {
+                        var data = $api.strToJson(ret.data)
+                        menudata = data.filter(function (s) {
+                            return s.select == true
+                        })
+                        app.catlist = menudata
+                        app.initCatList()
+                    } else {
+                        api.readFile({
+                            path: 'widget://res/catlist.json'
+                        }, function (ret, err) {
+                            if (ret) {
+                                var data = $api.strToJson(ret.data)
+                                menudata = data.filter(function (s) {
+                                    return s.select == true
+                                })
+                                app.catlist = menudata
+                                saveCache('menudata', 'list', menudata)
+                                app.initCatList()
+                            }
+                        });
+                    }
+                })
+            },
+            initCatList() {
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.open({
+                    rect: {
+                        x: 0,
+                        y: 114,
+                        w: api.winWidth - 50,
+                        h: 50
+                    },
+                    styles: {
+                        orientation: 'horizontal',
+                        bg: '#f5f5f5',
+                        bgAlpha: 1,
+                        font: {
+                            size: 14,
+                            sizeSelected: 18,
+                            color: '#888',
+                            colorSelected: '#ff0000',
+                            alpha: 1,
+                            // bold:true,
+                        },
+                        itemSize: {
+                            w: 90,
+                            h: 44
+                        }
+                    },
+                    items: app.catlist,
+                    selectedIndex: 0,
+                    fixedOn: api.frameName,
+                    id: 'first'
+                }, function (ret, err) {
+                    // console.log(JSON.stringify(ret));
+                    if (ret.index > 0) {
+                        api.setFrameGroupIndex({
+                            name: 'group2',
+                            index: ret.index,
+                            scroll: true
+                        });
+                        api.setFrameGroupAttr({
+                            name: 'group2',
+                            hidden: false
+                        });
+
+
+                    } else if (ret.index == 0) {
+                        api.setFrameGroupIndex({
+                            name: 'groups',
+                            index: 1,
+                            scroll: true
+                        });
+                        api.setFrameGroupAttr({
+                            name: 'group2',
+                            hidden: true
+                        });
+                        // console.log(JSON.stringify(err));
+                    }
+                });
+
+
+            },
+            hiddenFrameGroup() {
+                api.setFrameGroupAttr({
+                    name: 'group2',
+                    hidden: true
+                });
+
+            },
+            startPlay() {
+                getCache('songCache', app.songid, function (ret, err) {
+
+                    if (ret.data && ret.data != "") {
+
+                        app.music_mp3 = $api.strToJson(ret.data).mp3
+                        playMusic(app.music_mp3)
+                    } else {
+                        $ku.getMp3Url({
+                            id: app.songid
+                        }, function (ret, err) {
+
+                            app.music_mp3 = ret.data[0].url
+                            playMusic(app.music_mp3)
+                            songCache(app.songid, app.music_mp3)
+                        })
+
+                    }
+                })
+
+                // app.getProgtress()
+
+
+            },
+            getProgtress() {
+                var audioStreamer = api.require('audioStreamer');
+                audioStreamer.addProgressListener({}, function (ret, err) {
+                    audioStreamer.getCurrentTime(function (ret) {
+                        app.music_img_min = app.music_imgurl
+                        app.isPlaying = true
+                        app.cur = ret.current
+
+                        app.current = formatSeconds(app.cur)
+                    });
+                    app.per = ret.progress
+                    api.sendEvent({
+                        name: 'per',
+                        extra: {
+                            per: app.per,
+                            currentTime: app.cur,
+                            current: app.current
+                        }
+                    });
+                });
+            },
+            openPlayer() {
+                app.hidefloatModule()
+                if (this.songName != '新感官音乐世界' && this.music_imgurl != '') {
+                    api.openTabLayout({
+                        name: 'nww',
+                        url: 'widget://html/music/bo.html',
+                        delay: 500,
+                        hideNavigationBar: false,
+                        animation: {
+                            type: "push", //动画类型（详见动画类型常量）
+                            subType: "from_bottom", //动画子类型（详见动画子类型常量）
+                            duration: 600 //动画过渡时间，默认300毫秒
+                        },
+                        navigationBar: {
+                            background: 'widget://image/hd2.jpg',
+                            color: '#fff',
+                            leftButtons: [{
+                                iconPath: 'widget://image/left_back.png'
+                            }],
+                            rightButtons: //（可选项）导航栏右边按钮组。按钮按照数组顺序从右至左显示，按钮建议最多2个，可以通过监听navitembtn事件来处理按钮点击事件，JSON对象数组类型
+                                [{
+                                    iconPath: 'widget://image/musiclistshare.png' //（可选项）按钮icon图标路径，可以和text同时存在，图片尺寸需要为4倍图，例如设备上面期望显示的图标尺寸为25*25，则图片实际尺寸需要为100*100，字符串类型
+                                }]
+                        },
+                        pageParam: {
+                            id: this.songid,
+                            mp3: this.music_mp3,
+                            artistsId: this.artistsId,
+                            songName: this.songName,
+                            artists: this.artists,
+                            music_imgurl: this.music_imgurl || this.music_img_min,
+                            index: this.index,
+                            duration: this.duration,
+                            music_thumb: this.music_thumb,
+                            music_dur: this.dur
+                        }
+                    });
+                }
+            },
+        }
+    })
+
+    function setNavBarAttr(index) {
+        var NVNavigationBar = api.require('NVNavigationBar');
+        NVNavigationBar.setSelected({
+            id: 'first',
+            index: index,
+            selected: true
+        }, function (ret) {
+
+        });
+    }
+
+    function getSongId(songid, index) {
+
+        if (songid != app.songid) {
+
+            app.err = false
+            app.songid = songid
+            app.index = index
+            app.songdatalist = $api.getStorage('listm');
+            app.stop()
+            app.init()
+        }
+
+
+    }
+</script>
+
+
+</html>

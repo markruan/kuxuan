@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="copyright" content="www.apicloud.com" />
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<title>歌单</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+
+	<style>
+		html,
+		.row {
+			display: -webkit-box;
+			display: -webkit-flex;
+		}
+		/** 头部背景 */
+
+		.egret-flex-item .topheaderbg {
+			width: 100%;
+			max-height: 250px;
+			filter: url(blur.svg#blur);
+			/* FireFox, Chrome, Opera */
+			-webkit-filter: blur(5px);
+			/* Chrome, Opera */
+			filter: progid: DXImageTransform.Microsoft.Blur(PixelRadius=10, MakeShadow=false);
+		}
+
+		.egret-flex-item .topheaderlogo {
+			position: absolute;
+			width: 50px;
+			height: 50px;
+			top: 30px;
+			left: 20px;
+		}
+
+		.egret-flex-item .info {
+			position: absolute;
+			left: 20px;
+			top: 110px;
+			font-size: 0.6em;
+			color: #fff;
+		}
+
+		.active {
+			color: red;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<!-- 1 用户登录 -->
+		<div class="egret-flex-item musiclistprofile" v-show=finish>
+			<img src="../../image/default.jpg" alt="" class="topheaderbg" id="bgpic">
+			<img id="usericon" src="" alt="" class="topheaderlogo H-paper-2 ">
+
+			<div class="info">只推荐你喜欢的音乐...</div>
+		</div>
+
+	</div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+	var app = new Vue({
+		el: '#app',
+		data: {
+			listData: [],
+			activeName: '',
+			data: [],
+			finish: false
+		},
+		watch: {
+			listData(curVal, oldVal) {
+				init1()
+			}
+		},
+		methods: {
+			openMusic: function(sid, index, name) {
+				this.activeName = name
+				api.execScript({
+						name:'index',
+						script: 'getSongId('+sid+','+index+')'
+				});
+				$api.setStorage('listm', app.listData);
+
+			},
+			openMusicPlay: function() {
+				app.openMusic(app.listData[0].id, 0)
+			},
+			getdaily: function() {
+				$ku.getDailySong( function(ret,err) {
+					var data=ret.data
+					 
+					app.listData = data.dailySongs 
+					var res = data.dailySongs 
+					for (var i = 0; i < res.length; i++) {
+						var list = {}
+						list.title = res[i].name
+						var arlist = res[i].ar
+						list.subTitle=''
+						for (var f = 0; f < arlist.length; f++) {
+							list.subTitle += arlist[f].name + ((arlist.length - 1 === f) ? '' : '/')
+						}
+						list.id = res[i].id
+						list.itemHeight = 65
+						list.imgPath = res[i].al.picUrl + '?param=200y200'
+						list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+						list.remarkSize = 12
+						list.remarkIconWidth = 20
+            app.data[i] = list
+					}
+
+					$api.setStorage('listm', app.listData);
+					saveCache('dailymusic', 'daily', app.data)
+				})
+			}
+		},
+		created: function() {
+			// console.log(123);
+		}
+	})
+
+
+	apiready = function() {
+
+		uiloading()
+		app.getdaily()
+		api.imageCache({
+			url: $api.getStorage('userinfo').backgroundUrl + '?param=640y300'
+		}, function(ret, err) {
+			$api.attr($api.byId('bgpic'), 'src', ret.url);
+		});
+		$api.attr($api.byId('usericon'), 'src', $api.getStorage('userinfo').avatarUrl);
+		getCache('dailymusic', 'daily', function(ret, err) {
+			if (ret.data && ret.data != '') {
+				var data = $api.strToJson(ret.data)
+				app.getdaily()
+
+			} else {
+				app.getdaily()
+			}
+		})
+		api.execScript({
+			name: 'index',
+			script: 'app.showfloatModule();'
+		});
+
+	}
+
+
+	function init1() {
+		var UIListView = api.require('UIListView');
+		UIListView.open({
+			rect: {
+				x: 0,
+				y: 260,
+				w: api.winWidth,
+				h: api.frameHeight + 260
+
+			},
+			data: app.data,
+			styles: {
+				borderColor: '#f1ecec',
+				item: {
+					bgColor: '#FFF',
+					activeBgColor: '#F5F5F5',
+					height: 70,
+					imgWidth: 50,
+					imgHeight: 50,
+					imgCorner: 1,
+					placeholderImg: '',
+					titleSize: 16.0,
+					titleColor: '#fb6f6f',
+					subTitleSize: 10.0,
+					subTitleColor: 'rgb(50,50,50)',
+					remarkColor: '#fb6f6f',
+					remarkSize: 10,
+					remarkIconWidth: 28
+				}
+			},
+			// fixedOn: api.frameName
+		}, function(ret, err) {
+			stoploading()
+			app.finish = true
+			if (ret.eventType == "clickContent" || ret.eventType == "clickImg") {
+				var index = ret.index
+				UIListView.reloadData({
+					data: app.data
+				}, function(ret) {
+
+				});
+				UIListView.updateItem({
+					index: index,
+					data: {
+						title: app.data[index].title,
+						subTitle: app.data[index].subTitle,
+						id: app.data[index].id,
+						itemHeight: 65,
+						imgPath: app.data[index].imgPath,
+						icon: 'widget://html/music/image/musiclist/musiclistmore.png',
+						remark: '播放中...'
+
+					}
+				}, function(ret, err) {
+
+				});
+				app.openMusic(app.data[index].id, index)
+			} else if (ret.eventType == "clickRemark") {
+				var index = ret.index
+				var dialogBox = api.require('dialogBox');
+				dialogBox.actionMenu({
+					rect: {
+						h: 150
+					},
+					texts: {
+						cancel: '取消'
+					},
+					items: [{
+						text: '喜欢',
+						icon: 'widget://html/music/image/musiclist/musiclisttool01.png'
+					}, {
+						text: '歌手',
+						icon: 'widget://html/music/image/musiclist/musiclisttool04.png'
+					}, {
+						text: '专辑',
+						icon: 'widget://html/music/image/musiclist/musiclisttool05.png'
+					}, {
+						text: '添加到歌单',
+						icon: 'widget://image/plus.png'
+					}],
+					styles: {
+						bg: '#FFF',
+						column: 4,
+						itemText: {
+							color: '#000',
+							size: 12,
+							marginT: 8
+						},
+						itemIcon: {
+							size: 40
+						},
+						cancel: {
+							bg: '#ff0000',
+							color: '#fff',
+							h: 44,
+							size: 14
+						}
+					},
+					tapClose: true
+				}, function(ret) {
+					if (ret.eventType == 'cancel') {
+						dialogBox.close({
+							dialogName: 'actionMenu'
+						});
+
+					}
+					switch (ret.index) {
+						case 0:
+							likeSong(app.listData[index].id)
+							dialogBox.close({
+								dialogName: 'tips'
+							});
+							break;
+						case 1:
+							openart(app.listData[index].artists[0].id)
+							break;
+						case 2:
+							openAlubm(app.listData[index].album)
+							break;
+						case 3:
+							openMyGeDan(app.listData[index].id)
+							break;
+						case 4:
+							// app.openWebView()
+							break;
+						default:
+
+					}
+				});
+
+			}
+
+		});
+	}
+</script>
+
+</html>

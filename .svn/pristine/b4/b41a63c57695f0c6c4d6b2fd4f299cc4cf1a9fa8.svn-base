@@ -1,0 +1,313 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="copyright" content="www.apicloud.com" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>歌单</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        html,
+        body {
+            min-height: 100%;
+            background-color: #f9f9f9;
+        }
+
+        .active {
+            color: red
+        }
+
+        .hide {
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="hide">
+
+        <div class="H-flexbox-horizontal H-theme-background-color-white background H-border-vertical-bottom-after H-clear-both">
+            <div class="H-padding-vertical-both-10 H-box-sizing-border-box"><img v-bind:src="artistImg" alt="" title="" class="H-display-block H-margin-horizontal-left-10  H-paper-3 " style="width: 120px; height: 120px;"></div>
+            <div class="H-flex-item H-padding-10 H-position-relative H-box-sizing-border-box" style="height: 140px; ">
+                <span class="H-flex-item  H-font-size-18  H-text-show-row-1" style="margin-left:35px">{{info.name}}</span>
+                <span class="H-flex-item  H-font-size-14  "></span>
+                <p class="H-font-size-10 H-theme-font-color-999 H-position-absolute H-z-index-10 H-margin-0" style="bottom: 50px; left: 10px; right: 10px;">
+                    <!-- <span class="H-flex-item"><i class="H-iconfont H-icon-star-null H-theme-font-color4 H-font-size-18 H-margin-horizontal-right-5"></i><i class="H-iconfont H-icon-star-null H-theme-font-color4 H-font-size-18 H-margin-horizontal-right-5"></i><i class="H-iconfont H-icon-star-null H-theme-font-color4 H-font-size-18 H-margin-horizontal-right-5"></i><i class="H-iconfont H-icon-star-null H-theme-font-color4 H-font-size-18 H-margin-horizontal-right-5"></i><i class="H-iconfont H-icon-star-null H-theme-font-color4 H-font-size-18 H-margin-horizontal-right-5"></i> 1727人评分</span> -->
+                </p>
+                <span class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-red H-padding-horizontal-right-5 H-z-index-100" @click="subArt(info.id)"></span>
+
+                <!-- <p class="H-font-size-10 H-theme-font-color-999 H-position-absolute H-z-index-10 H-margin-0" style="bottom: 10px; left: 10px; right: 10px;">专辑:{{info.albumSize}} MV:{{info.mvSize}}</p> -->
+
+                <span class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-red H-padding-horizontal-right-5 H-z-index-100"></span>
+                <div class="H-flexbox-horizontal H-text-align-center H-padding-horizontal-both-5 H-line-height-normal H-theme-font-color-black H-padding-vertical-both-15 H-box-sizing-border-box" style="margin-top:30px;">
+                    <div class="H-flex-item">
+                        <span class="H-icon H-center-all">{{info.albumSize}} </span>
+                        <label class="H-display-block H-font-size-13 H-margin-vertical-top-5 H-theme-font-color-999">专辑</label>
+                    </div>
+                    <div class="H-flex-item">
+                        <span class="H-icon H-center-all">{{info.mvSize}}</span>
+                        <label class="H-display-block H-font-size-13 H-margin-vertical-top-5 H-theme-font-color-999">MV</label>
+                    </div>
+                    <div class="H-flex-item" @click="subArt(info.id,followed)">
+                        <span class="H-icon H-center-all"><i class="H-iconfont  H-font-size-18 H-vertical-middle"  :class="[followed?'H-icon-like-null ':'H-icon-add']"></i></span>
+                        <label class="H-display-block H-font-size-13 H-margin-vertical-top-5 H-theme-font-color-999">{{followed?"已关注":"关注"}}</label>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    var isopen
+      var app = new Vue({
+        el: '#app',
+        data: {
+            listData: '',
+            artistId: '',
+            artistImg: "../../image/default.jpg",
+            activeName: '',
+            artistName: '',
+            briefDesc: '',
+            info: {},
+            followed: false,
+            title:''
+        },
+        watch: {
+            listData(curVal, oldVal) { 　
+                this.openframegroup(curVal)　　　　　　
+            },
+        },
+        methods: {
+
+            getartistlist: function(artistId) {
+                uiloading()
+                $ku.getArInfo({id:app.artistId} , function(ret, err) {
+                    if (ret) {
+                        app.info = ret.artist
+                        app.listData = ret.hotSongs
+                        app.artistName = ret.artist.name
+                        app.followed = ret.artist.followed
+                        app.artistImg = imageCache(ret.artist.picUrl + '?param=120y120')
+                        stoploading()
+                        $api.removeCls($api.byId('app'), 'hide');
+
+                    }
+                })
+              api.refreshHeaderLoadDone();
+
+            },
+            openMusic: function(sid, index, name) {
+                this.activeName = name
+                pi.execScript({
+        						name:'index',
+        						script: 'getSongId('+sid+','+index+')'
+        				});
+        				$api.setStorage('listm', app.listData);
+       
+            },
+            openMusicPlay: function() {
+
+                var index=0
+                var id=app.listData[0].id
+                pi.execScript({
+        						name:'index',
+        						script: 'getSongId('+id+','+index+')'
+        				});
+        				$api.setStorage('listm', app.listData);
+
+            },
+
+            subArt(aid, followed) {
+                if (followed) {
+                    api.confirm({
+                        title: '警告',
+                        msg: '确定取消收藏',
+                        buttons: ['确定', '取消']
+                    }, function(ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            $ku.subArt({t:2, id:aid}, function(ret, err) {
+                                if (ret.code == 200) {
+                                    api.toast({
+                                        msg: '取消成功',
+                                        duration: 2000,
+                                        location: 'bottom'
+                                    });
+                                    app.followed=false
+
+                                }
+                            })
+                        }
+                    });
+                } else {
+                    $ku.subArt({t:1, id:aid}, function(ret, err) {
+                        if (ret.code) {
+                          app.followed=true
+                            api.toast({
+                                msg: '收藏成功',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+
+                        }
+                    })
+                }
+
+            },
+
+            openframegroup(data) {
+                var NVNavigationBar = api.require('NVNavigationBar');
+                NVNavigationBar.open({
+                    rect: {
+                        x: 0,
+                        y: 144,
+                        w: api.frameWidth,
+                        h: 42
+                    },
+                    styles: {
+                        orientation: 'horizontal',
+                        bg: '#fff',
+                        bgAlpha: 1,
+                        font: {
+                            size: 14,
+                            sizeSelected: 18,
+                            color: '#657B83',
+                            colorSelected: '#ff0000',
+                            alpha: 1
+                        },
+                        itemSize: {
+                            w: api.winWidth / 4,
+                            h: 44
+                        }
+                    },
+                    items: [{
+                        title: '歌曲',
+                        bg: '#fff',
+                        bgSelected: '#fff'
+                    }, {
+                        title: '专辑',
+                        bg: '#fff',
+                        bgSelected: '#fff'
+                    }, {
+                        title: 'MV',
+                        bg: '#fff',
+                        bgSelected: '#fff'
+                    }, {
+                        title: '详情',
+                        bg: '#fff',
+                        bgSelected: '#fff'
+                    }],
+                    selectedIndex: 0,
+                    fixedOn: api.frameName,
+                    id: 'artist'
+                }, function(ret, err) {
+                    api.setFrameGroupIndex({
+                        name: 'artist',
+                        index: ret.index
+                    });
+                });
+                api.openFrameGroup({
+                    name: 'artist',
+                    background: '#fff',
+                    scrollEnabled: true,
+                    rect: {
+                        x: 0,
+                        y: 256,
+                        w: 'auto',
+                        h: 'auto'
+                    },
+                    index: 0,
+                    frames: [{
+                        name: 'songlist',
+                        url: 'songlist.html',
+                        bgColor: '#fff',
+                        pageParam: {
+                            data: app.listData
+                        }
+                    }, {
+                        name: 'aralbum',
+                        url: 'album.html',
+                        bgColor: '#fff',
+                        pageParam: {
+                            aid: app.artistId
+                        }
+                    }, {
+                        name: 'arMv',
+                        url: 'mv.html',
+                        bgColor: '#fff',
+                        pageParam: {
+                            aid: app.artistId
+                        }
+                    }, {
+                        name: 'desc',
+                        url: 'desc.html',
+                        bgColor: '#fff',
+                        pageParam: {
+                            info: app.info
+                        }
+                    }]
+                }, function(ret, err) {
+                    if (ret) {
+                        var NVNavigationBar = api.require('NVNavigationBar');
+                        NVNavigationBar.setSelected({
+                            id: 'artist',
+                            index: ret.index,
+                            selected: true
+                        }, function(ret) {
+                            //  alert(JSON.stringify(ret));x
+                        });
+                        //  alert( JSON.stringify( ret ) );
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+
+            }
+        },
+        created: function() {
+            // console.log(123);
+        }
+
+    })
+
+    var artistImg
+    apiready = function() {
+        api.execScript({
+            name: 'index',
+            script: 'app.showfloatModule();'
+        });
+        api.setFrameAttr({
+            name: api.frameName,
+
+            bounces: false,
+
+        });
+
+        app.artistId = api.pageParam.artistId
+            // app.artistImg = api.pageParam.artistImg
+            // var isopen = $api.getStorage('isopen');
+        window.addEventListener('scroll', function() {
+            var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            if (scrollTop > 250) {
+                var artistName = app.artistName
+                api.execScript({
+                    script: 'setTitle(\'' + artistName + '\' )'
+                });
+
+            }
+        })
+
+        app.getartistlist(app.artistId)
+
+    }
+</script>
+
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+      <style>
+          body{
+
+          }
+      </style>
+  </head>
+  <body>
+
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/axios.min.js"></script>
+  <script type="text/javascript" src="../../script/musicapi.js"></script>
+  <!-- <script type="text/javascript" src="../../script/music.js"></script> -->
+  <script type="text/javascript">
+      apiready = function(){
+         var uid=api.pageParam.uid
+         getinfo(uid)
+      };
+      function getinfo(uid) {
+          $ku.getUserPlaylist({uid:uid}, function(ret, err) {
+              var res = ret.playlist
+              var data = []
+              for (var i = 0; i < res.length; i++) {
+                  var list = {}
+                  list.title = res[i].name
+                  list.subTitle = res[i].creator.nickname
+                  list.id = res[i].id
+                  list.itemHeight = 65
+                  list.img = imageCache(res[i].coverImgUrl + '?param=150y150')
+                  list.rightBtn = [{
+                          bg: '#fb6f6f', //按钮背景色，支持 rgb，rgba，#，默认#ee8262.
+                          title: '收藏', //按钮名字，字符串类型，默认‘按钮’
+                          titleSize: 15, //按钮标题大小，默认12
+                          titleColor: '#000000', // 按钮标题颜色，支持 rgb，rgba，#，默认#ffffff
+                          selectedColor: 'ffffff', //按钮选中时候的颜色值,支持 rgb，rgba，#
+                          icon: 'widget://image/overviewList/delete.png'
+                      }] // 左滑单元格露
+                  data[i] = list
+              }
+              initPlayList(data)
+          })
+      }
+
+      function initPlayList(data) {
+          var overviewList = api.require('overviewList');
+          overviewList.open({
+              x: 0, // 横坐标, 默认 0.
+              y: 0, // 纵坐标, 默认 0.
+              w: api.winWidth,
+              h: api.frameHeight,
+              itemSlipDistance: 165,
+              datas: data,
+              fixedOn: api.frameName,
+              itemStyle: {
+                  height: 75, //（可选项）一条item的高度，数字类型，默认55
+                  bgColor: '#FFFFFF',
+                  titleColor: '#fb6f6f',
+                  subTitleColor: 'rgb(50,50,50)',
+                  borderColor: '#f1ecec'
+
+              }
+
+          }, function(ret, err) {
+
+
+              if (ret.eventType == 'content') {
+                  var index = ret.index
+                  openMusicList(data[index].id)
+
+                  // alert(JSON.stringify(ret));
+              } else {
+                  // alert(JSON.stringify(err));
+              }
+
+          });
+      }
+  </script>
+  </html>

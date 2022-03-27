@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<title>title</title>
+	<link rel="stylesheet" type="text/css" href="../css/Hui.css" />
+	<script type="text/javascript" src="../script/vue.min.js"></script>
+	<style>
+		.display1 {
+			display: none
+		}
+
+		html,
+		body {
+			background-color: #fff;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak class="H-padding-vertical-top-5">
+		<div v-show="xianshi">
+			<div v-html="html2"></div>
+		</div>
+		<ul v-if='articles.length>0' v-show="xianshi==false">
+			<div v-for='item in articles'>
+				<div class="H-text-list H-flexbox-horizontal  H-theme-background-color-white H-border-vertical-bottom-after H-vertical-middle ">
+					<div class="H-flex-item H-padding-horizontal-both-10 H-font-size-16 H-padding-vertical-both-12 H-touch-active" @click="openwv(item.id)">{{item.name}}-{{item.artists[0].name}}</div>
+
+				</div>
+		</ul>
+		</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/axios.min.js"></script>
+<script type="text/javascript" src="../script/musicapi.js"></script>
+
+<script type="text/javascript">
+	var data, list
+		//		var obj = $api.byId('list');
+	apiready = function() {
+		uiloading();
+		api.addEventListener({
+			name: 'smsg'
+		}, function(ret, err) {
+			app.message = ret.value.msg
+			app.say();
+
+		});
+		app.search_histry()
+
+	}
+	var app = new Vue({
+		el: '#app',
+		data: {
+			message: '',
+			articles: [],
+			mvs: [],
+			html2: '',
+			xianshi: true,
+			limit: 100,
+			page: 1,
+			isjiazai: true,
+			mvs: []
+		},
+		mounted: function() {},
+		methods: {
+			openwv: function(vid) {
+				api.openWin({
+					name: 'mvhead',
+					url: '../html/mv/mv_head.html',
+					pageParam: {
+						vid: vid
+					},
+					animation: {
+						type: "movein", //动画类型（详见动画类型常量）
+						subType: "from_bottom", //动画子类型（详见动画子类型常量）
+						duration: 400
+					}
+				});
+			},
+			init() {
+				var UIListGoods = api.require('UIListGoods');
+				UIListGoods.open({
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight - 104
+
+
+						},
+						data: app.mvs,
+						styles: {
+							item: {
+								bgColor: '#FFFFFF',
+								goodsNameSize: 9,
+								height: ((api.winWidth - 20) / 2 - 10) / 1.777 + 18,
+								imgWidth: (api.winWidth - 20) / 2 - 10, //（可选项）数字类型；列表项配图的宽度；默认：列表项的高度减去10px
+								imgHeight: ((api.winWidth - 20) / 2 - 10) / 1.777,
+								imgMarginTop: 0,
+
+							}
+						},
+
+						fixedOn: api.frameName,
+					},
+					function(ret, err) {
+						stoploading();
+						// alert(JSON.stringify(ret))
+						if (ret.eventType == 'clickContent') {
+							var index = ret.index
+
+							openMv(app.mvs[index].id)
+
+
+						} else {
+							// alert(JSON.stringify(err));
+						}
+					});
+
+			},
+			setdefault() {
+				app.xianshi = true
+				var UIListGoods = api.require('UIListGoods');
+				UIListGoods.close();
+			},
+			say: function() {
+				this.xianshi = false;
+				var params = {
+					keywords: app.message,
+					limit: app.limit,
+					offset: (this.page - 1) * this.limit,
+					type: 1004
+				}
+				$ku.search(params, function(ret, err) {
+					if (ret.code == 200 && ret.result.mvs) {
+						var res = ret.result.mvs
+						for (var i = 0; i < res.length; i++) {
+							var list = {}
+							list.goodsName = res[i].name
+							list.id = res[i].id
+							list.goodsNameSize = 10
+							list.subTitle = res[i].artistName
+							list.imgPath = imageCache(res[i].cover + '?param=320y180')
+
+							app.mvs[i] = list
+						}
+						// 			uid: '1001',
+						// imgPath: 'widget://res/img/apicloud.png',
+						// title: '标题',
+						// subTitle: '子标题，说明文字',
+						// remark: '备注',
+						// icon: ''
+
+						if (app.page == 1) {
+							app.init()
+						} else {
+							app.getMore()
+
+						}
+					} else {
+						api.toast({
+							msg: '没有更多了'
+						});
+						var UIListBook = api.require('UIListBook');
+						UIListBook.appendData({
+							data: []
+						}, function(ret, err) {
+							if (ret) {
+								// alert(JSON.stringify(ret));
+							} else {
+								alert(JSON.stringify(err));
+							}
+						});
+					}
+				});
+			},
+			getMore() {
+				// var UIListBook = api.require('UIListBook');
+				// UIListBook.appendData({
+				// 	data: app.mvs
+				// }, function(ret, err) {
+				// 	if (ret) {
+				// 		// alert(JSON.stringify(ret));
+				// 	} else {
+				// 		alert(JSON.stringify(err));
+				// 	}
+				// });
+			},
+			search_histry: function() {
+				uiloading()
+				list = $api.getStorage('h_list')
+				if ($api.getStorage('h_list') && $api.getStorage('h_list').length > 0) {
+					//						$api.removeCls(obj, 'H-display-none');
+					//					大于10条删除最后一条
+					if (list.length > 9) {
+						list.splice(0, 1);
+						$api.setStorage('h_list', list);
+					}
+					for (var i = 0; i < list.length; i++) {
+						this.html2 += '<div class="H-text-list H-flexbox-horizontal  H-theme-background-color-white H-border-vertical-bottom-after H-vertical-middle "   >';
+						this.html2 += '<div onclick="app.inputkey(' + i + ')"  class="H-flex-item H-padding-horizontal-both-10 H-font-size-16 H-padding-vertical-both-12"><span   class="H-touch-active ">' + list[i] + '</span></div><span onclick="app.clean_h(' + i +
+							')"class="H-icon H-padding-horizontal-both-20   H-display-block "><i class="H-iconfont H-icon-close  H-theme-font-color-ccc H-font-size-14 H-vertical-middle"></i></span></div>';
+					}
+				} else {
+					this.html2 = '<div class="H-center-all H-padding-vertical-top-20">暂无记录</div>';
+				}
+				stoploading()
+					//					$api.html(obj, this.html2);
+			},
+			inputkey: function(index) {
+				var list = $api.getStorage('h_list');
+				api.sendEvent({
+					name: 'smsg',
+					extra: {
+						msg: list[index]
+					}
+				});
+			},
+			clean_h: function(index) {
+				var list = $api.getStorage('h_list');
+				list.splice(index, 1)
+				$api.setStorage('h_list', list);
+				this.html2 = ''
+				app.search_histry();
+			}
+		}
+	})
+</script>
+
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+
+    </style>
+</head>
+
+<!-- <script type="text/javascript" src="../../script/H.js"></script> -->
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/echo.min.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+
+    var data3
+    var uid = $api.getStorage('userinfo').userId
+     function quxiao(id, index) {
+        api.actionSheet({
+            title: '取消收藏',
+            cancelTitle: '先留着',
+            destructiveTitle: '确定',
+            buttons: []
+        }, function(ret, err) {
+            if (ret.buttonIndex == 1) {
+              params={
+                like:false,
+                id:id,
+                timestamp:timestamp
+              }
+                $ku.likeOr(params, function(data) {
+                    if (data.code == 200) {
+                        api.toast({
+                            msg: '取消成功',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        var UIListView = api.require('UIListView');
+                        UIListView.deleteItem({
+                            index: index
+                        }, function(ret, err) {
+                            if (ret) {
+                                // alert(JSON.stringify(ret));
+                            } else {
+                                // alert(JSON.stringify(err));
+                            }
+                        });
+
+                    }
+                })
+
+            }
+        });
+
+    }
+
+
+    function getLikeList() {
+
+        $ku.getListDetail({
+                id: $api.getStorage('userinfo').UserLikeLlistID
+            }, function(ret, err) {
+                if (ret.code == 200) {
+                    var data1 = ret.playlist.tracks
+                    var songlist1 = []
+                    for (var i = 0; i < data1.length; i++) {
+                        var list = {}
+                        list.name = data1[i].name
+                        list.ar = data1[i].ar
+                        list.id = data1[i].id
+                        list.al = data1[i].al
+                        songlist1[i] = list
+                    }
+                    $api.setStorage('listm', songlist1);
+
+
+                    var info = {}
+                    var data = []
+                    for (var i = 0; i < data1.length; i++) {
+                        var list = {}
+                        list.title = data1[i].name
+                        list.imgPath = data1[i].al.picUrl + '?param=100y100'
+                        var arlist = data1[i].ar
+                        list.subTitle=''
+
+                        for (var f = 0; f < arlist.length; f++) {
+
+                            list.subTitle +=arlist[f].name + ((arlist.length - 1 === f) ? '' : '/')
+
+                        }
+
+                        list.id = data1[i].id
+                        data[i] = list
+
+                        data.info = songlist1
+                    }
+                    info.data = data
+                    info.musicdata = songlist1
+                    uilistView(data)
+                    saveCache('likelist', 'like', info)
+                } else {
+                    console.log(JSON.stringify(err));
+                }
+
+            })
+            // })
+
+    }
+  apiready = function() {
+        uiloading()
+
+        getCache('likelist', 'like', function(ret, err) {
+            if (ret) {
+                var info = $api.strToJson(ret.data)
+                var data = info.data
+                if (data == null) {
+                    getLikeList()
+                } else {
+                    uilistView(data)
+                    $api.setStorage('listm', info.musicdata);
+                }
+            } else {
+                getLikeList()
+            }
+        })
+
+        api.addEventListener({
+            name: 'isPlaying'
+        }, function(ret, err) {
+            if (ret) {
+                DsTime()
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+       };
+
+
+
+
+    function openPlayer(sid, index, data) {
+        api.execScript({
+            name: 'index',
+            script: 'getSongId(' + sid + ',' + index + ')'
+        });
+
+    }
+
+    function uilistView(data) {
+      // uiloading()
+        var UIListView = api.require('UIListView');
+        var listheight = api.systemType == "android" ? 69 : 64
+
+
+        UIListView.open({
+            rect: {
+                x: 0,
+                y: listheight,
+                w: api.winWidth,
+                h: api.frameHeight + listheight
+
+            },
+            data: data,
+            rightBtns: [{
+                bgColor: '#fb6f6f',
+                activeBgColor: '',
+                width: 70,
+                title: '取消收藏',
+                titleSize: 12,
+                titleColor: '#fff',
+                icon: '',
+                iconWidth: 20
+            }],
+            styles: {
+                borderColor: '#f1ecec',
+                item: {
+                    bgColor: '#FFF',
+                    activeBgColor: '#F5F5F5',
+                    height: 70,
+                    imgWidth: 50,
+                    imgHeight: 50,
+                    imgCorner: 1,
+                    placeholderImg: '',
+                    titleSize: 16.0,
+                    titleColor: '#fb6f6f',
+                    subTitleSize: 10.0,
+                    subTitleColor: 'rgb(50,50,50)',
+                    remarkColor: '#fb6f6f',
+                    remarkSize: 10,
+                    remarkIconWidth: 28
+                }
+            },
+            fixedOn: api.frameName
+        }, function(ret, err) {
+            // UIListView.hide();
+            //
+            // if(ret.eventType=="show"){
+            //   UIListView.setAttr({
+            //       y: listheight,
+            //
+            //   }, function(ret, err) {
+            //       if (ret) {
+            //         UIListView.show();
+            //           // alert(JSON.stringify(ret));
+            //       } else {
+            //           alert(JSON.stringify(err));
+            //       }
+            //   });
+            // }
+            if (ret.eventType == "clickContent" || ret.eventType == "clickImg") {
+
+                openPlayer(data[ret.index].id, ret.index)
+
+                // var UIListView = api.require('UIListView');
+                // UIListView.reloadData({
+                //     data: data
+                // }, function(ret) {
+                //     if (ret) {
+                //
+                //     } else {
+                //         alert(JSON.stringify(err));
+                //     }
+                // });
+                // var updata = data[ret.index]
+                // updata.remark = "播放中"
+                // UIListView.updateItem({
+                //     index: ret.index,
+                //     data: updata
+                // }, function(ret, err) {
+                //     // if (ret) {
+                //     //     alert(JSON.stringify(ret));
+                //     // } else {
+                //     //     alert(JSON.stringify(err));
+                //     // }
+                // });
+
+                // alert(JSON.stringify(data));
+            } else if (ret.eventType == "clickRightBtn") {
+
+                quxiao(data[ret.index].id, ret.index)
+            } else {
+
+            }
+
+        });
+        var UIListView = api.require('UIListView');
+        UIListView.setRefreshHeader({
+            loadingImg: 'widget://image/refresh.png',
+            bgColor: '#F5F5F5',
+            textColor: '#8E8E8E',
+            textDown: '下拉可以刷新...',
+            textUp: '松开开始刷新...',
+            showTime: true
+        }, function(ret, err) {
+            if (ret) {
+                UIListView.reloadData({
+                    data: data3
+                }, function(ret) {
+                    if (ret) {
+                        getLikeList()
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+
+    }
+</script>
+
+</html>

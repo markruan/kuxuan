@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <style>
+        #imgg {
+            width: 44px;
+            height: 44px;
+        }
+
+        html,
+        body {
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div v-if="show" class="H-header  H-display-block H-theme-background-color-white" id="footbar">
+            <span id="footer">
+              <span class="H-icon H-position-relative H-center-all H-display-inline-block H-vertical-middle H-theme-font-color-white   H-z-index-100"><img id="imgg" src="../../image/loading.gif" style="width: 44px;height: 44px;" alt=""></span>
+            </span>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+ <script type="text/javascript">
+    var app = new Vue({
+        el: "#body",
+        data: {
+            index: 0,
+            cat: '',
+            menulength: '',
+            menudata: [],
+            listdata: [],
+            page: 1,
+            show: true
+        },
+        watch: {
+            cat(curVal, oldVal) {
+                getdata()　　　　
+            }
+        },
+        methods: {
+            init() {
+                var UIListGoods = api.require('UIListGoods');
+                UIListGoods.open({
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: api.winWidth,
+                            h: api.frameHeight
+
+
+                        },
+                        data: app.listdata,
+                        // backgroundColor:'#FFFFFF',
+                        styles: {
+                            item: {
+                                bgColor: '#fff',
+                                height: (api.winWidth - 20) / 2 + 26,
+                                imgWidth: (api.winWidth - 20) / 2 - 10, //（可选项）数字类型；列表项配图的宽度；默认：列表项的高度减去10px
+                                imgHeight: (api.winWidth - 20) / 2 - 10,
+                                imgMarginTop: 0,
+                            }
+                        },
+                        fixedOn: api.frameName,
+                    },
+                    function(ret, err) {
+                        // alert(JSON.stringify(ret))
+                        app.show = false
+                        if (ret.eventType == 'clickContent') {
+
+                            var artistsId = app.listdata[ret.index].id
+                            openMusicList(artistsId)
+                        } else {
+                            // alert(JSON.stringify(err));
+                        }
+                    });
+            }
+        }
+    })
+
+    function getdata() {
+        var params = {
+            order: 'hot',
+            limit: 40,
+            cat: app.cat
+        }
+        $ku.getTopPlaylist(params, function(ret, err) {
+            if (ret) {
+                var data = []
+                for (var i = 0; i < ret.playlists.length; i++) {
+                    var list = {}
+                    list.goodsName = ret.playlists[i].name
+                    list.id = ret.playlists[i].id
+                    list.imgPath = ret.playlists[i].coverImgUrl + '?param=200y200',
+                        data[i] = list
+                }
+                // console.log(JSON.stringify(data));
+
+                app.listdata = data
+                app.init()
+               
+            } else {
+                // alert(JSON.stringify(err));
+            }
+        });
+
+    }
+    apiready = function() {
+        app.cat = api.frameName
+
+        getdata()
+
+        api.setFrameAttr({
+            name: api.frameName,
+            reload: true,
+            bounces: false
+        });
+
+        api.addEventListener({
+            name: 'scrolltobottom',
+            extra: {
+                threshold: 10 //设置距离底部多少距离时触发，默认值为0，数字类型
+            }
+        }, function(ret, err) {
+            // api.setFrameAttr({
+            //     name: api.frameName,
+            //     reload: true,
+            //     bounces: false
+            // });
+        });
+
+
+    }
+</script>
+
+</html>

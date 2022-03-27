@@ -1,0 +1,148 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=0, width=device-width">
+
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css">
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <style>
+        .category li {
+            display: inline-block;
+            width: 24%;
+            text-align: center;
+            padding: 10px 0;
+            float: left;
+        }
+
+        li span {
+            width: 88%;
+            box-sizing: border-box;
+            border: 1px solid #DDDDDE;
+            padding: 7px 0;
+            border-radius: 20px;
+            color: #424242;
+        }
+
+        .active {
+            color: red;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background-color: transparent;
+            overflow: hidden;
+        }
+
+        .mask {
+            height: 40%;
+        }
+
+        .main {
+            /*-webkit-transition: all .3s;
+            transition: all .3s;
+            -webkit-transform: translateY(100%);*/
+            height: 60%;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+            flex-flow: column;
+            background-color: white;
+        }
+
+        .main.in {
+            -webkit-transform: translateY(0%);
+        }
+
+        #main {
+            position: relative;
+            overflow: auto;
+            /*-webkit-overflow-scrolling: touch;*/
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+        }
+        .H-theme-background-color11{
+          background-image: linear-gradient( 135deg, #FFAA85 10%, #B3315F 100%);
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="mask" @click="closePage"></div>
+
+        <div class="main">
+            <header class="H-header H-theme-background-color11" id="header">
+                <span @click="api.closeFrame()" class="H-icon H-position-relative H-display-inline-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-left-15 H-z-index-100"><label class="H-display-block H-vertical-middle H-font-size-15">取消</label></span>
+                <div class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent"></div>
+                <span @clikc="saveData" class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-white H-padding-horizontal-right-15 H-z-index-100"><label class="H-display-block H-vertical-middle H-font-size-15">保存</label></span>
+            </header>
+            <div class="" id="main" style="">
+                <ul class="category" v-for="(item,index) in menudata">
+                    <li><span @click="selected(item.title,index)" :class="{active: item.select == true}">{{item.title}}</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="../../script/api.js"></script>
+    <script src="../../script/music.js"></script>
+    <script>
+        apiready = function() {
+          
+            app.init()
+
+        }
+        var app = new Vue({
+            el: "#app",
+            data: {
+                menudata: [],
+                activeName: '',
+
+            },
+            methods: {
+                init() {
+                    getCache('menudata', 'list', function(ret, err) {
+                        if (ret.data) {
+                            app.menudata = $api.strToJson(ret.data)
+                        } else {
+                            console.log(JSON.stringify(ret));
+                        }
+                    })
+                },
+                selected: function(gameName, index) {
+                    this.activeName = gameName
+                    if (this.menudata[index].select) {
+                        this.menudata[index].select = false
+                    } else {
+                        this.menudata[index].select = true
+                    }
+                    // api.sendEvent({
+                    //     name: 'updateCat',
+                    // });
+                    api.closeFrameGroup({
+                        name: 'group2'
+                    });
+                    api.sendEvent({
+                        name: 'updateCat',
+                    });
+                    saveCache('menudata', 'list', this.menudata)
+                },
+                closePage() {
+                    api.closeFrame();
+                },
+                saveData(){
+
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>

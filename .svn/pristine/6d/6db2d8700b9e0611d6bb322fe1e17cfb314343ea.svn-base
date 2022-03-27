@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        body {}
+    </style>
+</head>
+
+<body>
+   <div id="empty"></div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    var uid
+    apiready = function() {
+        uiloading()
+        getCache('artists', 'info', function(ret, err) {
+            if (ret.data && ret.data != '') {
+                var data = $api.strToJson(ret.data)
+                init(data)
+                getData()
+            } else {
+                getData()
+            }
+
+        })
+
+    };
+
+    function getData() {
+        var uid = $api.getStorage('userinfo').userId
+
+       $ku.getUserPlaylist({uid:uid},function(ret,err){
+            if (ret.playlist.length > 0) {
+                init(ret.playlist)
+                saveCache('artists', 'info', ret.playlist)
+            } else {
+              str1 = '<div class=""><p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">暂无数据...</p><div class="H-padding-vertical-bottom-10"></div></div>';
+
+              $api.html($api.byId('empty'), str1);
+            }
+        });
+    }
+
+    function init(datainfo) {
+
+        var data
+        var html = ''
+        var count, startnum
+        var arr = datainfo
+        var uid = $api.getStorage('userinfo').userId
+        if (uid == 1602618880) {
+            data = arr.filter(function(x) {
+                return x.creator.userId != uid;
+            });
+        } else if (api.pageParam.iscreatlist) {
+            data = arr.filter(function(x) {
+                return x.creator.userId == uid;
+            });
+        } else {
+
+            data = arr.filter(function(x) {
+                return x.creator.userId != uid;
+            });
+        }
+
+        var data1 = []
+        for (var i = 0; i < data.length; i++) {
+            var list = {}
+            list.goodsName = data[i].name
+            list.id = data[i].id
+            list.goodsNameSize = 10
+            list.imgPath = imageCache(data[i].coverImgUrl + '?param=400y400'),
+
+
+                data1[i] = list
+        }
+        initPlayList(data1)
+            // 存储收藏的歌单ID,歌单list页面使用
+        var likelistids = []
+
+        for (var i = 0; i < datainfo.length; i++) {
+            var list = []
+            list = datainfo[i].id
+            likelistids[i] = list
+        }
+        $api.setStorage('likelistids', likelistids);
+
+
+        // stoploading()
+
+
+    }
+
+    function initPlayList(data) {
+        var UIListGoods = api.require('UIListGoods');
+        UIListGoods.open({
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: api.winWidth,
+                    h: api.frameHeight
+
+                },
+                data: data,
+                styles: {
+                    item: {
+                        bgColor: '#FFFFFF',
+                        goodsNameSize: 9,
+                        height: (api.winWidth - 20) / 2 + 26,
+                        imgWidth: (api.winWidth - 20) / 2 - 10, //（可选项）数字类型；列表项配图的宽度；默认：列表项的高度减去10px
+                        imgHeight: (api.winWidth - 20) / 2 - 10,
+                        imgMarginTop: 0,
+
+                    }
+                },
+
+                fixedOn: api.frameName,
+            },
+            function(ret, err) {
+                stoploading();
+                // alert(JSON.stringify(ret))
+                if (ret.eventType == 'clickContent') {
+
+                    var artistsId = data[ret.index].id
+                    openMusicList(artistsId)
+                } else {
+                    // alert(JSON.stringify(err));
+                }
+            });
+    }
+</script>
+
+</html>

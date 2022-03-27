@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>title</title>
+	<link href="../../css/Hui.css" rel="stylesheet" type="text/css" />
+	<link href="../../css/iconfont.css" rel="stylesheet" type="text/css" />
+
+	<script type="text/javascript" src="../../script/vue.min.js"></script>
+	<!-- <script type="text/javascript" src="../../script/lyric/lyricer.min.js"></script>
+	<link rel="stylesheet" href="../../script/lyric/lyricer.min.css"> -->
+	<style>
+	.play-up-bg {
+			margin: 0 auto;
+			width: 70%;
+			/*height: 60%;*/
+			border-radius: 60%;
+			-moz-box-shadow: 0px 0px 2em #333333;
+			-webkit-box-shadow: 0px 0px 2em #333333;
+			box-shadow: 0px 0px 2em #333333;
+			border: 1px solid rgba(235, 103, 136, 0.48);
+		}
+
+		.lyric-color {
+			color: rgba(235, 103, 136, 0.48);
+		}
+
+		.xuanzhuan {
+			-webkit-animation: circle 45s infinite linear;
+			/*匀速 循环*/
+		}
+
+		@-webkit-keyframes circle {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	}
+	.controler {
+		height: 300px;
+	}
+	.controler-bg {
+		width: 100%;
+		/*position: absolute;*/
+		/*图片模糊*/
+		/*-webkit-filter: blur(30px);
+				max-height: 300px;*/
+	}
+	.e {
+		left: 10px;
+		text-align: right;
+		/*padding-left: 100px;*/
+	}
+	.s {
+		right: 100px;
+		text-align: left;
+		padding-right: 5px;
+	}
+	.icon-pause:before {
+		content: "\e603";
+		margin-top: 2px;
+	}
+	#men {
+		height: 300px;
+	}
+	.icon-focus {
+		color: rgba(205, 198, 198, 0.2);
+	}
+	.kongZhi {
+		margin-top: 12px;
+		width: 80%;
+		margin: 0 auto;
+	}
+	.H-width-80-percent {
+		width: 80%;
+	}
+	.H-theme-font-color-white {
+		color: #999;
+	}
+	.H-theme-font-color-white1 {
+		color: white;
+	}
+	.classA {
+		color: red;
+	}
+	.calssB {
+		color: white
+	}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+
+
+		<div class="" style="padding-top: 10%">
+			<!-- <img id="bg" :src='music_imgurl' alt=""  v-blind:class="play-up-bg H-center-all "> -->
+			<img id="bg" :src='music_imgurl' :onerror="this.src='../../image/default.jpg'" alt="" :class="{ xuanzhuan:isPlaying }" :class="{imgfadein:fadeIn}" class="play-up-bg H-center-all animated ">
+
+		</div>
+		<!-- 歌词 -->
+		<div id="lyricer" class='lyric-color animated fadeInUp' style="text-align:center;margin-top:3%;"></div>
+		<div class="  " style="position: fixed;bottom: 0px;width: 100%;">
+			<span class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white   H-width-100-percent  " style="height:30px; ">{{music_title}} </span>
+			<!--<br />-->
+			<span id="titleName" class="H-header-title H-center-all H-font-size-12 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent" style="height:30px;">{{music_artist}} </span>
+			<br />
+
+			<!--<span class="   H-theme-font-color-white  H-width-100-percent " > <i class="iconfont icon-play H-center-all H-margin-vertical-top-10 "style="font-size:60px;color: white;top: 12px;"> </i> </span>-->
+			<div class="H-n-grid kongZhi H-clear-both  H-overflow-auto H-margin-vertical-top-12">
+				<div class="H-clear-both H-width-100-percent H-display-table H-box-sizing-border-box H-center-all">
+					<div class=" leftB  H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-3 H-center-all H-theme-background-color-transparent    H-padding-vertical-both-10" style="min-height: 80px;">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i tapmode @click="playBack" id="prev_b" data-sid="" data-index=""  tapmode  class="iconfont icon-mediaprevious  H-font-size-32 H-vertical-middle H-theme-font-color-white H-theme-font-color9-click"style="  font-size:30px;"></i></span>
+						</div>
+					</div>
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-3 H-center-all H-theme-background-color-transparent    H-padding-vertical-both-0" style="min-height: 80px;">
+						<div>
+							<span class=" H-icon H-display-block H-horizontal-center "><i   data-click="0" tapmode data-url=""   @click='switchmusic' tapmode :class='[isPlaying?pauseicon:playicon]' class="iconfont   H-vertical-middle H-theme-font-color-white H-theme-font-color9-click "style="  font-size:70px;"></i></span>
+						</div>
+					</div>
+					<div class=" rightN H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-3 H-center-all H-theme-background-color-transparent   H-padding-vertical-both-10" style="min-height: 80px;">
+						<div>
+							<span id="next" class="H-icon H-display-block H-horizontal-center"><i tapmode @click="playNext" id="playNext_b" data-sid="" data-index=""  tapmode  class="iconfont icon-medianext   H-font-size-32 H-vertical-middle H-theme-font-color-white H-theme-font-color9-click"style="  font-size:30px;"></i></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="slider" class="H-padding-horizontal-both-0  ">
+				<span id="huakuai" class="s H-float-left   H-padding-horizontal-left-5 H-padding-vertical-top-10 H-z-index-1000" style="font-size: 1.1rem;  ">{{current}}</span>
+				<!--<input id="hua" type="range"  oninput="change()"  class="H-range H-width-80-percent H-position-relative  H-border-radius-3 H-theme-font-white"  value="0" >-->
+				<span class="e H-float-right   H-padding-horizontal-right-5 H-padding-vertical-top-10 H-z-index-1000" style="font-size: 1.1rem ; ">{{dur}}</span>
+			</div>
+			<div id="palyB" class="H-n-grid  H-clear-both H-center-all H-overflow-auto">
+				<div class=" H-clear-both H-width-100-percent H-display-table H-box-sizing-border-box H-padding-vertical-both-10">
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-5 H-center-all H-theme-background-color-transparent    H-padding-vertical-both-10" style=" min-height: 50px; ">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i id="menubtn" tapmode @click="openlist" class="iconfont icon-mulu  H-font-size-60 H-vertical-middle H-theme-font-color-white " style="    font-size:25px;"></i></span>
+						</div>
+					</div>
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-5 H-center-all H-theme-background-color-transparent    H-padding-vertical-both-10" style="min-height: 50px;">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i  id="shouC" tapmode @click='shoucang' tapmode=" iconfont  icon-focus " :class="[islike?'H-iconfont H-icon-like H-vertical-middle H-theme-font-color-red':'H-iconfont H-icon-like-null H-vertical-middle H-theme-font-color-white']" :style="{fontSize:'25px'}"></i></span>
+
+						</div>
+					</div>
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-5 H-center-all H-theme-background-color-transparent     H-padding-vertical-both-10" style="min-height: 50px;">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i id="rep" data-click="0" tapmode  @click='isXunHuan' tapmode  :class="[isRepeat?xunHuanIcon:noXunHuanIcon]" class="iconfont    H-vertical-middle H-theme-font-color-white"style="    font-size:25px;"></i></span>
+						</div>
+					</div>
+
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-5 H-center-all H-theme-background-color-transparent   H-padding-vertical-both-10" style="min-height: 50px;">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i tapmode @click="openComm" tapmode=" iconfont  icon-focus "  class="iconfont icon-pinglun   H-vertical-middle H-theme-font-color-white"style="    font-size:25px; "></i></span>
+						</div>
+					</div>
+					<div class="H-display-table-cell H-float-left H-box-sizing-border-box H-width-avg-5 H-center-all H-theme-background-color-transparent    H-padding-vertical-both-10" style="min-height: 50px;">
+						<div>
+							<span class="H-icon H-display-block H-horizontal-center"><i tapmode @click="openMore" tapmode  class="iconfont H-icon-pointmore   H-vertical-middle H-theme-font-color-white"style="    font-size:25px;"></i></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../../script/lyric.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+	// var lrc = new Lyricer({
+	// 	"showLines": 1,
+	// 	"clickable": false
+	// });
+	apiready = function() {
+		app.music_imgurl = api.pageParam.music_imgurl 
+		app.music_id = api.pageParam.id
+		app.music_index = api.pageParam.index
+		app.mlistdata = api.pageParam.mlistdata ? api.pageParam.mlistdata : $api.getStorage('listm');
+		app.slider()
+		app.init()
+		app.getLyric()
+		api.addEventListener({
+			name: 'paused'
+		}, function(ret, err) {
+			if (ret) {
+				app.isPlaying = false
+			}
+		});
+		api.addEventListener({
+			name: 'navitembtn'
+		}, function(ret, err) {
+			if (ret.type == 'right') {
+				app.shareWx()
+			} else {
+				api.closeWin();
+			}
+		});
+		// api.addEventListener({
+		// 	name: 'navitembtn'
+		// }, function(ret, err) {
+		// 	if (ret.type == 'left') {
+		//
+		// 	}
+		// });
+		api.addEventListener({
+			name: 'upDateSongInfo'
+		}, function(ret, err) {
+			if (ret) {
+
+				app.music_title = ret.value.songName
+				app.music_artist = ret.value.artists
+				app.music_id = ret.value.songid
+
+				api.imageCache({
+					url: ret.value.music_imgurl
+				}, function(ret, err) {
+					if (ret) {
+						app.music_imgurl = ret.url
+					}
+				});
+
+				app.ifLike()
+				app.duration = ret.value.duration
+				app.music_mp3 = ret.value.mp3
+				app.music_thumb = ret.value.thumb
+				app.dur = formatSeconds(app.duration)
+				app.getLyric()
+			} else {
+				alert(JSON.stringify(err));
+			}
+		});
+
+    $api.setStorage('current',0)
+		api.addEventListener({
+			name: 'per'
+		}, function(ret, err) {
+
+			if (ret.value&&$api.getStorage('current')!=ret.value.current) {
+				$api.setStorage('current',ret.value.current)
+				app.current = ret.value.current
+				app.isPlaying = true
+					// 歌词显示
+      	getLyrics(app.lyric, app.current, function(i) {
+						 var html='<span class="H-font-size-16 animated slideInUp">'+app.lyric[i].split(']')[1]+'</span><br><span class="H-theme-font-color-999 H-font-size-12 animated slideInUp">'+app.lyric[i+1].split(']')[1]+'</span>'
+						$api.html($api.byId("lyricer"), html)
+       	});
+				var uislider = api.require('UISlider');
+				uislider.setValue({
+					id: 1,
+					value: {
+						min: 0,
+						max: 100,
+						step: 1,
+						value: ret.value.per
+					}
+				});
+			} else {
+				// alert(JSON.stringify(err));
+			}
+		});
+		api.addEventListener({
+			name: 'noCopyRight'
+		}, function(ret, err) {
+			if (ret) {
+
+				api.toast({
+					msg: '暂无版权',
+					duration: 2000,
+					location: 'bottom'
+				});
+			} else {
+				//  alert( JSON.stringify( err ) );
+			}
+		});
+		api.addEventListener({
+			name: 'isNotPlaying'
+		}, function(ret, err) {
+			app.isPlaying = false
+		});
+
+		// 判断是否循环播放
+		app.isRepeat = $api.getStorage('isRepeat') && $api.getStorage('isRepeat') == 1 ? true : false
+
+	}
+
+	var app = new Vue({
+		el: '#app',
+		data: {
+			mlistdata: '',
+			music_imgurl: '',
+			music_thumb: '../../image/default.jpg',
+			music_title: '',
+			music_artist: '',
+			music_id: '',
+			music_mp3: '',
+			music_index: '',
+			playState: true,
+			isPlaying: false,
+			isRepeat: false,
+			xunHuanIcon: 'icon-danquxunhuan',
+			noXunHuanIcon: 'icon-xunhuan',
+			playicon: 'icon-bofang',
+			pauseicon: 'icon-zanting',
+			current: '00:00',
+			duration: '3:27',
+			islike: true,
+			like: false,
+			cur: '',
+			dur: '',
+			lyric: '',
+			per: '',
+			calssA: "calssA",
+			calssB: "calssB",
+			artistId: '',
+			albumInfo: '',
+			imgfadein: false
+		},
+		watch: {
+			islike(curVal, oldVal) {
+				// console.log(curVal,oldVal);　
+				// this.dur=formatSeconds(curVal)　
+				// console.log(this.dur);　
+
+			},
+			music_imgurl(curVal, oldVal) {
+				app.imgfadein = true
+				setTimeout(function() {
+					app.imgfadein = false
+				}, 100)
+
+			},
+			music_id(curVal, oldVal) {
+				$ku.getMusicInfo({
+					ids: curVal
+				}, function(ret, err) {
+					var songinfo = ret.songs[0]
+					app.artistId = songinfo.ar[0].id ? songinfo.ar[0].id : songinfo.artists[0].id
+					app.albumInfo = songinfo.al
+				})
+			}
+		},
+		methods: {
+			init: function() {
+				app.ifLike()
+				app.music_title = api.pageParam.songName
+				app.music_artist = api.pageParam.artists
+				app.music_imgurl = api.pageParam.music_imgurl
+				app.music_thumb = api.pageParam.music_thumb
+				app.duration = api.pageParam.duration
+				app.dur = formatSeconds(api.pageParam.duration)
+				app.music_mp3 = api.pageParam.mp3
+			},
+			switchmusic: function() {
+				if (app.isPlaying) {
+					app.isPlaying = false;
+
+					// api.sendEvent({
+					// 	name: 'paused',
+					// });
+					api.execScript({
+						name: 'index',
+						script: 'app.pause();'
+					});
+				} else {
+					app.isPlaying = true;
+					api.execScript({
+						name: 'index',
+						script: 'app.play();'
+					});
+				}
+			},
+			pause: function() {
+				var audioPlayer = api.require('audioPlayer');
+				audioPlayer.pause();
+			},
+			replay: function() {
+				var audioPlayer = api.require('audioPlayer');
+				audioPlayer.play();
+			},
+			stop: function() {
+				var audioPlayer = api.require('audioPlayer');
+				audioPlayer.stop();
+			},
+			slider: function() {
+				var offset = $api.offset($api.byId('huakuai'));
+				var width = offset.w;
+				var top = offset.t
+				var uislider = api.require('UISlider');
+				uislider.open({
+					animation: true,
+					orientation: 'horizontal',
+					rect: {
+						x: width,
+						y: top + 16,
+						size: api.winWidth - width * 2
+					},
+					bubble: {
+						direction: 'top',
+						state: 'hide'
+					},
+					handler: {
+						w: 10,
+						h: 10,
+						bg: 'widget://image/slider/slider-btn.png'
+					},
+					bar: {
+						h: 3,
+						bg: 'widget://image/slider/slider-bg.png',
+						active: 'widget://image/slider/slider-btn2.png'
+					},
+					value: {
+						min: 0, //数字类型；滑动控件的最小值
+						max: 100, //数字类型；滑动控件的最大值
+						step: 1, //数字类型；滑动时的步幅
+						init: 0,
+					},
+					fixedOn: api.frameName,
+					fixed: false
+				}, function(ret, err) {
+
+					if (ret.eventType == 'end') {
+						var audioPlayer = api.require('audioPlayer');
+
+						var current = parseInt(ret.value)
+
+						var time = current / 100 * app.duration
+						api.sendEvent({
+							name: 'seekTo',
+							extra: {
+								time: time
+							}
+						});
+
+					} else {
+						// alert(JSON.stringify(err));
+					}
+				});
+			},
+			openlist: function() {
+				api.openFrame({
+					name: 'mlist_bo',
+					url: 'bolist.html',
+					rect: {
+						x: 0,
+						y: 0,
+						w: api.winWidth,
+						h: api.winHeight
+					},
+					bgColor: 'rgba(0,0,0,0.6)',
+					animation: {
+						type: "fade", //动画类型（详见动画类型常量）
+						subType: "from_bottom", //动画子类型（详见动画子类型常量）
+						// duration: 450 //动画过渡时间，默认300毫秒
+					},
+					bounces: false,
+					// vScrollBarEnabled: false,
+					// hScrollBarEnabled: false,
+					pageParam: app.mlistdata
+				});
+			},
+
+			shareWx: function() {
+				var data = {}
+				data.title = app.music_title;
+				data.art = app.music_artist;
+				data.img = app.music_thumb;
+				data.mp3 = 'http://music.163.com/song/media/outer/url?id=' + app.music_id + '.mp3';
+				data.id = app.music_id;
+				api.openFrame({
+					name: 'sing_share',
+					url: '../../html/single_share_body.html',
+					bgColor: 'rgba(0,0,0,0.1)',
+					rect: {
+						x: 0,
+						y: 0,
+						w: api.winWidth,
+						h: api.winHeight + 68
+					},
+					animation: {
+						type: "fade", //动画类型（详见动画类型常量）
+						subType: "from_right", //动画子类型（详见动画子类型常量）
+						duration: 300 //动画过渡时间，默认300毫秒
+
+					},
+					pageParam: {
+						data: data
+					},
+				});
+
+			},
+			openComm: function() {
+				api.openWin({
+					name: 'comm',
+					url: '../../html/music/comm/head.html',
+					opaque: true,
+					vScrollBarEnabled: false,
+					pageParam: {
+						type: 0,
+						sid: app.music_id
+					}
+				});
+
+			},
+			isXunHuan: function() {
+				if (app.isRepeat) {
+					app.isRepeat = false
+					$api.setStorage('isRepeat', 0);
+
+				} else {
+					app.isRepeat = true
+					$api.setStorage('isRepeat', 1);
+				}
+			},
+			playNext: function() {
+
+				// api.sendEvent({
+				// 	name: 'playNext',
+				//
+				// });
+				api.execScript({
+					name: 'index',
+					script: 'app.playNext()'
+				});
+
+
+
+			},
+			playBack: function() {
+				// api.sendEvent({
+				// 	name: 'playBack',
+				//
+				// });
+				api.execScript({
+					name: 'index',
+					script: 'app.playBack();'
+				});
+
+
+			},
+			shoucang: function() {
+				var islike = app.islike ? false : true
+				$ku.likeOr({
+					like: islike,
+					id: app.music_id,
+					timestamp: timestamp
+				}, function(ret, err) {
+					//  console.log(JSON.stringify(data));
+					app.islike = app.islike ? false : true
+
+					if (ret.code == 200) {
+						api.toast({
+							msg: '成功',
+							duration: 2000,
+							location: 'bottom'
+						});
+
+					} else {
+						api.toast({
+							msg: '失败',
+							duration: 2000,
+							location: 'bottom'
+						});
+					}
+				})
+
+			},
+			openMore() {
+				var dialogBox = api.require('dialogBox');
+				dialogBox.actionMenu({
+					rect: {
+						h: 150
+					},
+					texts: {
+						cancel: '取消'
+					},
+					items: [{
+						text: '收藏',
+						icon: 'widget://html/music/image/musiclist/musiclisttool01.png'
+					}, {
+						text: '歌手',
+						icon: 'widget://html/music/image/musiclist/musiclisttool04.png'
+					}, {
+						text: '专辑',
+						icon: 'widget://html/music/image/musiclist/musiclisttool05.png'
+					}, {
+						text: '添加到歌单',
+						icon: 'widget://image/plus.png'
+					}],
+					styles: {
+						bg: '#FFF',
+						column: 4,
+						itemText: {
+							color: '#000',
+							size: 12,
+							marginT: 8
+						},
+						itemIcon: {
+							size: 40
+						},
+						cancel: {
+							bg: '#ff0000',
+							color: '#fff',
+							h: 44,
+							size: 14
+						}
+					},
+					tapClose: true
+				}, function(ret) {
+					if (ret.eventType == 'cancel') {
+						dialogBox.close({
+							dialogName: 'actionMenu'
+						});
+
+					}
+					switch (ret.index) {
+						case 0:
+							// 	 app.shoucangSong(id)
+							// openArtist(api.pageParam.artistsId)
+							break;
+						case 1:
+							openart(app.artistId)
+							break;
+						case 2:
+							openAlubm(app.albumInfo)
+							break;
+						case 3:
+							openMyGeDan(app.music_id)
+							break;
+						case 4:
+							// app.openWebView()
+							break;
+						default:
+
+					}
+				});
+			},
+			getLyric: function() {
+				$ku.getLyric({
+					id: app.music_id
+				}, function(ret, err) {
+					$api.html($api.byId('lyricer'), "");
+					if (ret.lrc) {
+						app.lyric = parseLyrics(ret.lrc.lyric);
+
+						// app.lyric = ret.lrc.lyric
+						// lrc.setLrc(app.lyric);
+					} else {
+						$api.html($api.byId('lyricer'), "<br/>");
+					}
+				})
+			},
+			ifLike() {
+				// 判断是否like
+				if ($api.getStorage('userinfo')) {
+					$ku.getLikeList({
+						uid: $api.getStorage('userinfo').userId,
+						timestamp: timestamp
+					}, function(ret, err) {
+						var likelist = ret.ids
+						var res = isInArray(likelist, app.music_id);
+						if (res) {
+							app.islike = true
+						} else {
+							app.islike = false
+						}
+
+					})
+				} else {
+					app.islike = false
+				}
+
+			}
+
+
+		}
+	})
+</script>
+
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <style>
+        body {}
+    </style>
+</head>
+
+<body>
+ <div id="empty"></div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    var data = []
+    apiready = function() {
+        getdata()
+    };
+
+    function getdata() {
+        $ku.getArSub( function(ret, err) {
+
+            var res = ret.data 
+           if(res.length){
+            for (var i = 0; i < res.length; i++) {
+                var list = {}
+                list.title = res[i].name
+                list.id = res[i].id
+                list.subTitle = res[i].albumSize + '个专辑      ' + res[i].mvSize + '个MV'
+                list.imgPath = imageCache(res[i].img1v1Url + '?param=300y300')
+                    // list.icon = 'widget://image/bo.png'
+                list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+                data[i] = list
+            }
+            initPlayList(data)
+         }else{
+           str1 = '<div class=""><p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">暂无数据...</p><div class="H-padding-vertical-bottom-10"></div></div>';
+
+           $api.html($api.byId('empty'), str1);
+         }
+        })
+    }
+
+    function updata() {
+        $ku.getArSub( function(ret, err) {
+            var res = ret.data
+            for (var i = 0; i < res.length; i++) {
+                var list = {}
+                list.title = res[i].name
+                list.id = res[i].id
+                list.subTitle = res[i].albumSize + '个专辑      ' + res[i].mvSize + '个MV'
+                list.imgPath = imageCache(res[i].img1v1Url + '?param=300y300')
+                list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+                data[i] = list
+            }
+            var UIListView = api.require('UIListView');
+            UIListView.reloadData({
+                data: data
+            }, function(ret) {
+                if (ret) {
+                    // console.log(JSON.stringify(ret));
+                } else {
+                    alert(JSON.stringify(err));
+                }
+            });
+        })
+    }
+
+    function initPlayList(data) {
+        var UIListView = api.require('UIListView');
+
+        UIListView.open({
+            rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.frameHeight
+
+            },
+            data: data,
+            styles: {
+                borderColor: '#f1ecec',
+                item: {
+                    bgColor: '#FFF',
+                    activeBgColor: '#F5F5F5',
+                    height: 65,
+                    imgWidth: 50,
+                    imgHeight: 50,
+                    imgCorner: 25,
+                    placeholderImg: '',
+                    titleSize: 16.0,
+                    titleColor: '#333',
+                    subTitleSize: 10.0,
+                    subTitleColor: 'rgb(50,50,50)',
+                    remarkColor: '#000',
+                    remarkSize: 16,
+                    remarkIconWidth: 30
+                }
+            },
+            fixedOn: api.frameName
+        }, function(ret, err) {
+            stoploading()
+            if (ret.eventType == "clickContent" || ret.eventType == "clickImg") {
+
+                openart(data[ret.index].id, ret.index)
+                    // alert(JSON.stringify(data));
+            } else if (ret.eventType == "clickRemark") {
+                var index = ret.index
+                api.confirm({
+                    title: '警告',
+                    msg: '取消关注',
+                    buttons: ['确定', '取消']
+                }, function(ret, err) {
+                    if (ret.buttonIndex == 1) {
+                        $ku.subArt({t:2, id:data[index].id}, function(ret, err) {
+                            console.log(JSON.stringify(ret));
+                            if (ret.code == 200) {
+                                api.toast({
+                                    msg: '取消成功',
+                                    duration: 2000,
+                                    location: 'bottom'
+                                });
+
+                            }
+                        })
+                    }
+                });
+
+            }
+
+        });
+        var UIListView = api.require('UIListView');
+        UIListView.setRefreshHeader({
+            loadingImg: 'widget://image/refresh.png',
+            bgColor: '#F5F5F5',
+            textColor: '#8E8E8E',
+            textDown: '下拉可以刷新...',
+            textUp: '松开开始刷新...',
+            showTime: true
+        }, function(ret, err) {
+            if (ret) {
+                updata()
+                UIListView.reloadData({
+                    data: data
+                }, function(ret) {
+                    if (ret) {
+
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+    }
+</script>
+
+</html>

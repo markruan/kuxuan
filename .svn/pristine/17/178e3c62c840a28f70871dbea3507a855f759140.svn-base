@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<title>title</title>
+	<link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+	<style>
+		body,html {
+		 background-color: #fff
+		}
+	</style>
+</head>
+<script type="text/html" id="tppl">
+
+</script>
+
+<body >
+<span id=footer></span>
+
+</body>
+<script type="text/javascript" src="../../script/H.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript">
+	H.tppl_flag = ["<%", "%>"];
+
+
+	function initPage() {
+		var db = api.require('db');
+		db.openDatabase({
+			name: 'history2'
+		}, function(ret, err) {
+			if (ret.status) {
+				db.selectSql({
+					name: 'history2',
+					sql: 'SELECT * FROM mlist group by mlist_id  order by mlist_date desc'
+				}, function(ret, err) {
+					if (ret.status&&ret.data.length) {
+
+						var dblist = []
+						var list = ret.data
+						for (var i = 0; i < list.length; i++) {
+							var arr = {}
+							arr.id = list[i].id
+							var namearr = []
+
+							var name1 = {
+								name: list[i].mlist_artist
+							}
+							namearr[0] = name1
+							arr.artists = namearr
+							arr.name = list[i].mlist_name
+							dblist[i] = arr
+						}
+						initList(dblist)
+					}else{
+						str1 = '<div class="H-theme-background-color-white "><p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">没有更多了...</p><div class="H-padding-vertical-bottom-10"></div></div>';
+
+						$api.html($api.byId('footer'), str1);
+					}
+				});
+
+			} else {
+				alert(JSON.stringify(err));
+			}
+		});
+	}
+
+	function initList(data1) {
+		var data = []
+		for (var i = 0; i < data1.length; i++) {
+			var list = {}
+
+			list.title = data1[i].name
+			list.subTitle = data1[i].artists[0].name
+			list.id = data1[i].id
+			list.itemHeight = 55
+			list.leftColor = '#fff'
+			list.rightBtns = [{
+				bgColor: '#388e8e', //（可选项）字符串类型；按钮背景色，支持 rgb、rgba、#；默认：'#388e8e'
+				activeBgColor: '', //（可选项）字符串类型；按钮按下时的背景色，支持 rgb、rgba、#
+				width: 70, //（可选项）数字类型；按钮的宽度；默认：w / 4
+				title: '删除历史', //（可选项）字符串类型；按钮标题，水平、垂直居中
+				titleSize: 12, //（可选项）数字类型；按钮标题文字大小；默认：12
+				titleColor: '#fff', //（可选项）字符串类型；按钮标题文字颜色，支持 rgb、rgba、#；默认：'#ffffff'
+				icon: '', //（可选项）字符串类型；按钮标题前的图标路径（本地路径，支持fs://、widget://），水平、垂直居中，图标为正方形
+				iconWidth: 20 //（可选项）数字类型；按钮标题前的图标宽度，图标为正方形；默认：20
+			}]
+			data[i] = list
+		}
+		var listViewEntity = api.require('listViewEntity');
+		listViewEntity.open({
+			rect: {
+				x: 0,
+				y: 0,
+				w: api.winWidth,
+				h: api.frameHeight
+			},
+			data: data,
+			styles: {
+				borderColor: '#f1ecec',
+				item: {
+					bgColor: '#FFFFFF',
+					activeBgColor: '#F5F5F5',
+					titleSize: 14.0,
+					titleColor: 'rgb(50,50,50)',
+					subTitleSize: 12.0,
+					subTitleColor: '#93948f',
+					subTitleBottomMargin: 10
+				}
+			},
+			fixedOn: api.frameName
+		}, function(ret, err) {
+			if (ret.eventType == "clickContent") {
+				var index = ret.index
+				listViewEntity.getDataByIndex({
+					index: index
+				}, function(ret, err) {
+					if (ret) {
+						// api.sendEvent({
+						// 	name: 'songid',
+						// 	extra: {
+						// 		id: ret.data.id,
+						// 		index: index,
+						// 		songlist: data1
+						// 	}
+						// });
+						api.execScript({
+								name:'index',
+								script: 'getSongId('+ret.data.id+','+index+')'
+						});
+						$api.setStorage('listm', data1);
+					}
+
+				});
+				// alert(JSON.stringify(ret));
+			} else if (ret.eventType == 'clickRightBtn') {
+
+				var db = api.require('db');
+				db.executeSql({
+					name: 'history2',
+					sql: 'DELETE from mlist where id=' + data[ret.index].id
+				}, function(ret, err) {
+					if (ret.status) {
+						api.toast({
+							msg: '删除成功',
+							duration: 2000,
+							location: 'bottom'
+						});
+						listViewEntity.deleteItem({
+							index: ret.index
+						}, function(ret, err) {
+
+						});
+					} else {
+						alert(JSON.stringify(err));
+					}
+				});
+			}
+		});
+	}
+	H.ready(function() {
+		api.execScript({
+			name: 'index',
+			script: 'app.showfloatModule();'
+		});
+		initPage()
+	});
+</script>
+
+</html>

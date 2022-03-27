@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <style>
+        body {}
+    </style>
+</head>
+
+<body id='app'>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/music.js"></script>
+<script type="text/javascript" src="../../script/jquery/jquery.min.js"></script>
+
+<script type="text/javascript">
+    var app = new Vue({
+        el: "#app ",
+        data: {
+            listData: [],
+            listinfo: [{
+              title:{}
+            }],
+            index:0
+        },
+        watch:{
+          index(curVal, oldVal){
+            this.updataIteam(curVal)
+          }
+        },
+        methods: {
+            initlist() {
+                var UIListView = api.require('UIListView');
+
+                UIListView.open({
+                    rect: {
+                        x: 0,
+                        y: 0,
+                        w: api.winWidth,
+                        h: api.frameHeight
+
+                    },
+                    data: app.listinfo,
+                    styles: {
+                        borderColor: '#f1ecec',
+                        item: {
+                            bgColor: '#FFF',
+                            activeBgColor: '#F5F5F5',
+                            height: 60,
+                            imgWidth: 1,
+                            imgHeight: 50,
+                            titleSize: 16.0,
+                            titleColor: '#000',
+                            subTitleSize: 10.0,
+                            subTitleColor: 'rgb(50,50,50)',
+                            remarkColor: '#fb6f6f',
+                            remarkSize: 10,
+                            remarkIconWidth: 28
+                        }
+                    },
+                    fixedOn: api.frameName
+                }, function(ret, err) {
+                    stoploading()
+                    var index = ret.index
+                    app.index=ret.index
+                    if (ret.eventType == "clickContent") {
+                        // api.sendEvent({
+                        //     name: 'songid',
+                        //     extra: {
+                        //         id: app.listData[index].id,
+                        //         index: index,
+                        //         songlist: app.listData
+                        //     }
+                        // });
+                        api.execScript({
+                						name:'index',
+                						script: 'getSongId('+app.listData[index].id+','+index+')'
+                				});
+                        app.updataIteam(index)
+                        $api.setStorage('listm', app.listData);
+                    } else if (ret.eventType == "clickRemark") {
+
+                        var dialogBox = api.require('dialogBox');
+                        dialogBox.actionMenu({
+                            rect: {
+                                h: 150
+                            },
+                            texts: {
+                                cancel: '取消'
+                            },
+                            items: [{
+                                text: '喜欢',
+                                icon: 'widget://html/music/image/musiclist/musiclisttool01.png'
+                            }, {
+                                text: '专辑',
+                                icon: 'widget://html/music/image/musiclist/musiclisttool05.png'
+                            }, {
+                                text: '添加到歌单',
+                                icon: 'widget://image/plus.png'
+                            }],
+                            styles: {
+                                bg: '#FFF',
+                                column: 3,
+                                itemText: {
+                                    color: '#000',
+                                    size: 12,
+                                    marginT: 8
+                                },
+                                itemIcon: {
+                                    size: 40
+                                },
+                                cancel: {
+                                    bg: '#ff0000',
+                                    color: '#fff',
+                                    h: 44,
+                                    size: 14
+                                }
+                            },
+                            tapClose: true
+                        }, function(ret) {
+                            if (ret.eventType == 'cancel') {
+                                dialogBox.close({
+                                    dialogName: 'actionMenu'
+                                });
+
+                            }
+                            switch (ret.index) {
+                                case 0:
+                                    likeSong(app.listData[index].id)
+                                    var dialogBox = api.require('dialogBox');
+                                    dialogBox.close({
+                                        dialogName: 'tips'
+                                    });
+                                    break;
+
+                                case 1:
+                                    openAlubm(app.listData[index].al)
+                                    break;
+                                case 2:
+                                    openMyGeDan(app.listData[index].id)
+                                    break;
+                                case 3:
+                                    // app.openWebView()
+                                    break;
+                                default:
+
+                            }
+                        });
+                    }
+                });
+
+            },
+            updataIteam(index) {
+              var UIListView = api.require('UIListView');
+                UIListView.reloadData({
+                    data: app.listinfo
+                }, function(ret) {
+
+                });
+
+                UIListView.updateItem({
+                    index: index,
+                    data: {
+                        title: app.listinfo[app.index].title,
+                        subTitle: app.listinfo[app.index].subTitle,
+                        id: app.listinfo[app.index].id,
+                        itemHeight: 65,
+                        imgPath: 'widget://image/tou.png',
+                        icon: 'widget://html/music/image/musiclist/musiclistmore.png',
+                        remark: '播放中...'
+
+                    }
+                }, function(ret, err) {
+
+                });
+            }
+        }
+
+    })
+    apiready = function() {
+        app.listData = api.pageParam.data
+        for (var i = 0; i < app.listData.length; i++) {
+            var list = {}
+            list.title = app.listData[i].name
+            list.subTitle = app.listData[i].ar[0].name
+            list.id = app.listData[i].id
+            list.imgPath = 'widget://image/tou.png'
+                // list.leftColor = '#fff'
+            list.icon = 'widget://html/music/image/musiclist/musiclistmore.png'
+            app.listinfo[i] = list
+        }
+        api.addEventListener({
+            name: 'upDateSongInfo'
+        }, function(ret, err) {
+            if (ret) {
+                app.index = ret.value.index
+            } else {
+                //  alert( JSON.stringify( err ) );
+            }
+        });
+        app.initlist()
+
+    };
+</script>
+
+</html>

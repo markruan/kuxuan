@@ -1,0 +1,292 @@
+<!doctype html>
+<html class="H-theme-background-color-white">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>Hello APP</title>
+    <link href="../../../css/Hui.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../../script/vue.min.js"></script>
+    <style>
+        #imgg {
+            height: 44px;
+            margin-left: 60px
+        }
+    </style>
+</head>
+
+<body class="H-theme-background-color-white">
+    <div class="  " id="app">
+
+
+        <div v-if="hotList.length>0" class="H-channel-title  H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after ">
+            <div class="H-channel-line H-theme-background-color-red H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1 ">
+                热门评论 <span class="H-font-size-10"></span>
+            </div>
+        </div>
+        <div id="hotCom" class="H-display-block H-theme-background-color-white" v-for="(item,index) in hotList">
+            <div class="H-flexbox-horizontal H-theme-background-color-white H-border-vertical-bottom-after H-clear-both">
+                <div class="H-padding-vertical-both-8"  @click="openPerCenter(item.user.userId)">
+                    <img   :src="item.user.avatarUrl + '?param=30y30'" srcs="" alt="" title="" class="imgCache H-display-block H-margin-horizontal-left-10 H-border-radius-circle" style="width: 30px; height: 30px;">
+                </div>
+                <div class="H-flex-item H-margin-vertical-both-8 H-margin-10">
+                    <div class="H-theme-font-color-999 H-flexbox-horizontal H-text-horizontal-left H-box-sizing-border-box" @click="openPerCenter(item.user.userId)">
+                        <span class="H-display-block H-flex-item H-text-align-left H-font-size-14 H-theme-font-color1">{{item.user.nickname}}</span>
+                        <!-- <span class="H-display-block H-flex-item H-text-align-right H-theme-font-color-999 H-font-size-12">1楼</span> -->
+                    </div>
+                    <div class="H-font-size-12 H-margin-vertical-top-5 H-font-size-12" id="address">
+                        {{item.content}}
+                    </div>
+                    <div class="H-font-size-10 H-theme-font-color-999 H-text-show-row-1 H-padding-vertical-top-3 H-font-size-12" id="address">
+                        {{UnixToDate(item.time)}}<span @click="commentLike(item.liked ,item.commentId,index,true)" class="H-theme-font-color1 H-float-right">{{item.likedCount}} <i class="H-iconfont H-icon-ding-null H-font-size-14 H-padding-vertical-both-5" :class="item.liked?isZan:noZan"></i></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="H-channel-title  H-flexbox-horizontal H-theme-background-color-white H-vertical-middle H-border-vertical-bottom-after">
+            <div class="H-channel-line H-theme-background-color-red H-padding-vertical-top-15 H-padding-horizontal-left-3  H-margin-horizontal-left-10"></div>
+            <div class="H-channel-text H-theme-font-color-black H-flex-item H-font-size-18 H-theme-font-color-black H-padding-10 H-margin-horizontal-right-10 H-text-show-row-1">
+                评论列表 <span id="total" class="H-font-size-10"></span>
+            </div>
+        </div>
+        <div v-if="comList.length" id="comm" class="H-display-block H-theme-background-color-white" v-for="(item,index) in comList">
+            <div class="H-flexbox-horizontal H-theme-background-color-white H-border-vertical-bottom-after H-clear-both">
+                <div class="H-padding-vertical-both-8" @click="openPerCenter(item.user.userId)">
+                    <img id="face" :src="item.user.avatarUrl + '?param=30y30'" srcs="" alt="" title="" class="imgCache H-display-block H-margin-horizontal-left-10 H-border-radius-circle" style="width: 30px; height: 30px;">
+                </div>
+                <div class="H-flex-item H-margin-vertical-both-8 H-margin-10">
+                    <div class="H-theme-font-color-999 H-flexbox-horizontal H-text-horizontal-left H-box-sizing-border-box" @click="openPerCenter(item.user.userId)">
+                        <span class="H-display-block H-flex-item H-text-align-left H-font-size-14 H-theme-font-color1">{{item.user.nickname}}</span>
+                        <!-- <span class="H-display-block H-flex-item H-text-align-right H-theme-font-color-999 H-font-size-12">1楼</span> -->
+                    </div>
+                    <div class="H-font-size-12 H-margin-vertical-top-5 H-font-size-12" id="address">
+                        {{item.content}}
+                    </div>
+                    <div class="H-font-size-10 H-theme-font-color-999 H-text-show-row-1 H-padding-vertical-top-3 H-font-size-12" id="address">
+                        {{UnixToDate(item.time)}}<span @click="commentLike(item.liked ,item.commentId,index,false)" class="H-theme-font-color1 H-float-right">{{item.likedCount?item.likedCount:''}} <i class="H-iconfont H-icon-ding-null H-font-size-14 H-padding-vertical-both-5" :class="item.liked?isZan:noZan"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="!isFinish" class="H-header  H-display-block H-theme-background-color-white" id="footbar">
+            <span id="footer">
+             <span class="H-icon H-position-relative H-display-inline-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-left-5 H-z-index-100"><img id="imgg" src="../../../image/loading.gif" alt=""></span>
+            <div class="H-header-title H-center-all H-font-size-14 H-text-show-row-1 H-theme-font-color-ccc H-position-absolute H-width-100-percent">加载中......</div>
+            </span>
+        </div>
+        <div v-else class="H-theme-background-color-white ">
+            <p class="H-font-size-12 H-theme-font-color-999 H-text-align-center" id="noreplay">{{comList.length?"没有更多了":"沙发空余，快来抢占"}} ...</p>
+            <div class="H-padding-vertical-bottom-10"></div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../script/api.js"></script>
+
+<script type="text/javascript" src="../../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../../script/musicapi.js"></script>
+
+<script type="text/javascript">
+    apiready = function() {
+        var obj = api.require('inputField');
+        app.type = api.pageParam.type
+        app.sid = api.pageParam.sid
+        app.page = 0
+
+        app.initPage()
+        app.commm()
+        api.addEventListener({
+            name: 'scrolltobottom',
+            extra: {
+                threshold: 250 //设置距离底部多少距离时触发，默认值为0，数字类型
+            }
+        }, function(ret, err) {
+            if (app.isjiazai) {
+                app.page++
+                    app.initPage()
+            }
+        });
+        api.parseTapmode();
+        api.setRefreshHeaderInfo({
+            loadingImg: 'widget://image/refresh.png',
+            visible: true,
+            bgColor: '#f2f2f2',
+            textColor: '#4d4d4d',
+            textDown: '下拉刷新...',
+            textUp: '松开刷新...',
+            showTime: true
+        }, function(ret, err) {
+            app.page = 0
+            app.isjiazai = true
+            app.initPage()
+            api.hideProgress();
+            api.refreshHeaderLoadDone();
+        });
+    }
+    var app = new Vue({
+        el: '#app',
+        data: {
+            isjiazai: true,
+            page: 0,
+            type: '',
+            sid: '',
+            offset: 0,
+            comtype: 'music',
+            hotList: [],
+            comList: [],
+            isZan: 'H-theme-font-color7',
+            noZan: 'H-theme-font-color-999',
+            pisotion: '',
+            isFinish: false
+
+
+
+
+        },
+        watch: {
+            hotList(curVal, oldVal) {
+
+            }
+        },
+        methods: {
+            initPage() {
+                app.isFinish = false
+                switch (app.type) {
+                    case 0:
+                        app.comtype = 'music'
+                        break;
+                    case 2:
+                        app.comtype = 'playlist'
+                        break;
+                    case 3:
+                        app.comtype = 'album'
+                        break;
+                    default:
+
+                }
+                var params = {
+                    comtype: app.comtype,
+                    id: app.sid,
+                    offset: app.page * 30,
+                    limit: 30
+                }
+
+                var html = '';
+                var html1 = '';
+                $ku.getCom(params, function(ret, err) {
+
+                    var commtotal = ret.total > 0 ? ret.total : null
+                    $api.text($api.byId('total'), commtotal);
+
+                    if (app.page == 0) {
+                        app.hotList = ret.hotComments
+                    }
+                    // var ret = ret.comments
+                    if (app.page == 0 && ret.comments.length <= 30) {
+                        app.comList = ret.comments
+                        app.isFinish = true
+                    } else if (app.page > 0 && 0 < ret.length < 30) {
+                        app.comList = app.comList.concat(ret.comments)
+                        app.isFinish = true
+
+                    } else {
+                        app.comList = app.comList.concat(ret.comments)
+                    }
+
+                });
+            },
+
+            commm() {
+                //获取用户信息
+                var obj = api.require('inputField');
+                var type = api.pageParam.type
+                var sid = api.pageParam.sid
+                obj.open({
+                    bgColor: '#fff',
+                    lineColor: '#ccc',
+                    fileBgColor: '#ffffff',
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    // sendImg: 'widget://res/send_bg.png',
+                    sendBtn: {
+                        bg: '#B3315F',
+                        sendH: 30,
+                        title: '发送'
+                    },
+                    placeholder: '千头万绪,落笔汇成一句评论'
+                }, function(ret, err) {
+                    var content = ret.msg
+                    var params = {
+                        t: 1,
+                        type: type,
+                        id: sid,
+                        content: content,
+                        timestamp: timestamp
+                    }
+                    if (content && panduan()) {
+
+                        $ku.comment(params, function(ret, err) {
+
+                            var data = ret
+
+                            if (data.code == 200) {
+                                app.initPage(type, sid);
+                                api.toast({
+                                    msg: "评论成功",
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            } else {
+                                app.initPage(type, sid);
+                                api.toast({
+                                    msg: data.message,
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            }
+                        })
+                    } else {
+                        api.alert({
+                            msg: '输入不能为空!!'
+                        }, function(ret, err) {
+                            initPage(type, sid);
+                        });
+                    }
+                });
+            },
+            commentLike(t, commentId, index, isHot) {
+                if (isHot) {
+                    app.hotList[index].liked = t ? false : true
+                    app.hotList[index].likedCount= t?app.hotList[index].likedCount-=1:app.hotList[index].likedCount+=1
+                } else {
+                    app.comList[index].liked = t ? false : true
+                      app.comList[index].likedCount= t?app.comList[index].likedCount-=1:app.comList[index].likedCount+=1
+                }
+
+                var type = api.pageParam.type
+
+                var t = t ? 0 : 1
+                var params = {
+                    t: t,
+                    type: type,
+                    cid: commentId,
+                    id: api.pageParam.sid
+                }
+                $ku.commentLike(params, function(ret, err) {
+                    if (ret.code == 200) {
+                        // api.toast({
+                        //     msg: '点赞成功',
+                        //     duration: 2000,
+                        //     location: 'bottom'
+                        // });
+                    }
+
+                })
+            },
+            
+        }
+    })
+</script>
+
+</html>

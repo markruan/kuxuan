@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+
+    <style>
+        #imgg {
+            width: 44px;
+            height: 44px;
+        }
+
+        html,
+        body {
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+
+        <div v-if="show" class="H-header  H-display-block H-theme-background-color-white" >
+              <span id="footer" style="height:60px">
+              <span class="H-icon H-position-relative H-center-all H-display-inline-block H-vertical-middle H-theme-font-color-white   H-z-index-100"><img id="imgg" src="../../image/loading.gif" style="width: 44px;height: 44px;" alt=""></span>
+            </span>
+       </div>
+       <header   onclick="openArrow()" class="H-header H-theme-background-color-white H-position-fixed H-z-index-100" id="header" style="top:0;right:0;min-height:62px">
+
+           <span  style="height:46px" tapmode="" class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-black H-padding-horizontal-right-20 H-z-index-100" data-click='0' ><i data-click="0" class="H-iconfont H-icon-wangge H-font-size-18 H-padding-vertical-top-10"></i></span>
+       </header>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+    var app = new Vue({
+        el: "#body",
+        data: {
+            index: 0,
+            cat: '',
+            menulength: '',
+            menudata: [],
+            listdata: [],
+            page: 1,
+            show: true
+        },
+        watch: {
+            cat(curVal, oldVal) {
+                getdata()　　　　
+            }
+        },
+        methods: {
+            init() {
+                var UIListGoods = api.require('UIListGoods');
+                UIListGoods.open({
+                        rect: {
+                            x: 0,
+                            y: 47,
+                            w: api.winWidth,
+                            h: api.frameHeight - 47
+                        },
+                        data: app.listdata,
+                        // backgroundColor:'#FFFFFF',
+                        styles: {
+                            item: {
+                                bgColor: '#fff',
+                                height: (api.winWidth - 20) / 2 + 26,
+                                imgWidth: (api.winWidth - 20) / 2 - 10, //（可选项）数字类型；列表项配图的宽度；默认：列表项的高度减去10px
+                                imgHeight: (api.winWidth - 20) / 2 - 10,
+                                imgMarginTop: 0,
+                            }
+                        },
+                        fixedOn: api.frameName,
+                    },
+                    function(ret, err) {
+                        // alert(JSON.stringify(ret))
+                        app.show = false
+                        if (ret.eventType == 'clickContent') {
+
+                            var artistsId = app.listdata[ret.index].id
+                            openMusicList(artistsId)
+                        } else {
+                            // alert(JSON.stringify(err));
+                        }
+                    });
+            }
+        }
+    })
+
+    function getdata() {
+        var params = {
+            order: 'hot',
+            limit: 40,
+            cat: "流行"
+        }
+        $ku.getTopPlaylist(params, function(ret, err) {
+            if (ret) {
+                var data = []
+                for (var i = 0; i < ret.playlists.length; i++) {
+                    var list = {}
+                    list.goodsName = ret.playlists[i].name
+                    list.id = ret.playlists[i].id
+                    list.imgPath = ret.playlists[i].coverImgUrl + '?param=200y200',
+                        data[i] = list
+                }
+                // console.log(JSON.stringify(data));
+
+                app.listdata = data
+                app.init()
+                return
+            } else {
+                // alert(JSON.stringify(err));
+            }
+        });
+
+    }
+    apiready = function() {
+
+        getdata()
+        api.setFrameAttr({
+            name: api.frameName,
+            reload: true,
+            bounces: false
+        });
+      setTimeout(function(){
+        api.setFrameGroupAttr({
+            name: 'group2',
+            hidden: true,
+            scrollEnabled: true,
+
+        });
+      },1000)
+    }
+
+    function openArrow() {
+      api.execScript({
+          name: 'index',
+          frameName: 'quanzi',
+          script: 'openArrow()'
+      });
+
+        //
+        // getCache('menudata', 'list', function(ret, err) {
+        //     if (ret.data) {
+        //         var data = $api.strToJson(ret.data)
+        //
+        //         var UIMultiSelector = api.require('UIMultiSelector');
+        //         UIMultiSelector.open({
+        //             rect: {
+        //                 h: api.winHeight / 2
+        //             },
+        //             text: {
+        //                 title: '分类选择',
+        //                 leftBtn: '取消',
+        //                 rightBtn: '保存',
+        //                 selectAll: '全选'
+        //             },
+        //             max: 0,
+        //             singleSelection: false,
+        //             styles: {
+        //                 mask: 'rgba(0, 0, 0, 0.27058823529411763)',
+        //                 title: {
+        //                     bg: '#f5f5f5',
+        //                     color: 'rgb(0,0,0)',
+        //                     size: 16,
+        //                     h: 44
+        //                 },
+        //                 leftButton: {
+        //                     w: 80,
+        //                     h: 35,
+        //                     marginT: 5,
+        //                     marginL: 8,
+        //                     color: '#fff',
+        //                     bg: '#FFAA85',
+        //                     size: 14,
+        //                 },
+        //                 rightButton: {
+        //                     w: 80,
+        //                     h: 35,
+        //                     marginT: 5,
+        //                     marginR: 8,
+        //                     color: '#fff',
+        //                     bg: '#B3315F',
+        //                     size: 14,
+        //                 },
+        //                 item: {
+        //                     h: 55,
+        //                     bg: '#FFAA85',
+        //                     bgActive: 'rgba(255,147,72,1)',
+        //                     bgHighlight: 'rgba(255,110,10,1)',
+        //                     color: 'rgb(0,0,0)',
+        //                     active: 'rgb(255,255,255)',
+        //                     highlight: 'rgb(255,255,255)',
+        //                     size: 14,
+        //                     lineColor: 'rgb(200,200,200)',
+        //                     textAlign: 'center',
+        //                 },
+        //                 icon: {
+        //                     w: 20,
+        //                     h: 20,
+        //                     marginT: 11,
+        //                     marginH: 8,
+        //                     bg: '#fff',
+        //                     bgActive: 'widget://image/dui.png',
+        //                     align: 'left'
+        //                 }
+        //             },
+        //             animation: true,
+        //             items: data
+        //         }, function(ret, err) {
+        //
+        //
+        //             switch (ret.eventType) {
+        //                 case 'clickItem':
+        //
+        //                     break;
+        //                 case 'clickRight':
+        //                     uiloading()
+        //
+        //                     var list = ret.items
+        //                     for (var i = 0; i < data.length; i++) {
+        //                         data[i].status = 'normal'
+        //                         data[i].select = false
+        //                     }
+        //                     for (var i = 0; i < list.length; i++) {
+        //                         if (list[i].status == 'selected') {
+        //                             for (var l = 0; l < data.length; l++) {
+        //                                 if (list[i].title == data[l].title) {
+        //                                     data[l].status = 'selected'
+        //                                     data[l].select = true
+        //                                 }
+        //                             }
+        //                         }
+        //
+        //                     }
+        //                     setTimeout(function() {
+        //
+        //                         saveCache('menudata', 'list', data)
+        //                         api.closeFrameGroup({
+        //                             name: 'group2'
+        //                         });
+        //                         api.sendEvent({
+        //                             name: 'updateCat',
+        //                         });
+        //
+        //                         getcatlist()
+        //
+        //                         UIMultiSelector.close();
+        //
+        //
+        //
+        //                     }, 1800)
+        //                     break;
+        //                 case 'clickLeft':
+        //                     UIMultiSelector.close();
+        //                     break;
+        //                 default:
+        //
+        //             }
+        //         });
+        //     }
+        // })
+
+    }
+</script>
+
+</html>

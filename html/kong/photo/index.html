@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../../../css/Hui.css" />
+		<style>
+			body {
+			}
+		</style>
+	</head>
+	<body>
+		<div class="H-width-80-percent  ">
+			<img id="img1" src="" / style="width: 100%; max-height: 600px;">
+			<textarea placeholder="聆听音乐  感悟人生" id="feed_text" style="height:100px;width: 100%;line-height:24px;"></textarea>
+			<!--<input id="feed_text" placeholder="聆听音乐 感悟人生"class="H-theme-border-color5" style="height:100px;width: 100%;line-height:24px;font-size: 18px"> </input>-->
+			<div class="H-center-all">
+				<button tapmode onclick="addpic()" class="H-button    H-font-size-15 H-outline-none H-padding-vertical-both-12 H-padding-horizontal-both-20 H-theme-background-color2 H-theme-font-color-white H-theme-border-color2 H-theme-border-color2-click H-theme-background-color2-click H-theme-font-color2-click H-border-radius-3" style="width: 80%; min-width: 220px  ">
+					发布
+				</button>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../../script/api.js"></script>
+	<script type="text/javascript" src="../../../script/H.js"></script>
+	<script type="text/javascript">
+		//		var img1 = 'http://p4.music.126.net/NLIxnlNPSPk3GFacJg01kA==/17814287393396301.jpg';
+		var type = 1;
+		//去除空格
+		function trimStr(str) {
+			return str.replace(/(^\s*)|(\s*$)/g, "");
+		}
+
+		function addpic() {
+			var text1 = $api.val($api.byId("feed_text"));
+			var img1 = $api.attr($api.byId('img1'), 'src');
+			uiloading();
+			api.ajax({
+				timeout : 300,
+				method : 'post',
+				url : hostUrl + '/upload.php',
+				data : {
+					files : {
+						upfile : img1
+					},
+				},
+				dataType : 'text',
+			}, function(ret, err) {
+				var aa = hostUrl + '/' + trimStr(ret)
+				api.getPrefs({
+					key : 'user'
+				}, function(ret, err) {
+					var username = ret.value;
+					var url = hostUrl + '/addpic.php';
+					if (ret) {
+						api.ajax({
+							url : url,
+							method : 'post',
+							dataType : 'text',
+							data : {
+								values : {
+									user : username,
+									type : type,
+									uid : $api.getStorage('userinfo').data_id,
+									text : text1,
+									img : aa
+								},
+							}
+						}, function(ret, err) {
+							if (ret == 1) {
+								stoploading();
+								api.toast({
+									msg : '发布成功'
+								});
+								var jsfun1 = 'initPage()';
+								api.execScript({
+									name : 'root',
+									frameName : 'quan_index',
+									script : jsfun1
+								});
+								api.closeWin({});
+							} else {
+								api.alert({}, function(ret, err) { msg:'发布失败'
+								});
+								api.execScript({
+									script : 'openquan()'
+								});
+								api.closeFrame({
+									name : 'kong'
+								});
+								api.closeWin({});
+							}
+						});
+					} else {
+						api.alert({
+							msg : JSON.stringify(err)
+						});
+					}
+				});
+			});
+		}
+
+		apiready = function() {
+			//			$api.attr($api.byId('img1'), 'src', api.pageParam.name);
+			api.setWinAttr({
+				bounces : false
+			});
+			openImageClipFrame(api.pageParam.name);
+			api.addEventListener({
+				name : 'myEvent'
+			}, function(ret, err) {
+				$api.attr($api.byId('img1'), 'src', ret.value.img_path);
+			});
+		};
+		function openImageClipFrame(img_src) {
+			api.openFrame({
+				name : 'tu',
+				scrollToTop : true,
+				allowEdit : true,
+				url : 'tu.html',
+				rect : {
+					x : 0,
+					y : 0,
+					w : api.winWidth,
+					h : api.winHeight,
+				},
+				animation : {
+					type : "reveal", //动画类型（详见动画类型常量）
+					subType : "from_right", //动画子类型（详见动画子类型常量）
+					duration : 300
+				},
+				pageParam : {
+					img_src : img_src
+				},
+				vScrollBarEnabled : false,
+				hScrollBarEnabled : false,
+				//页面是否弹动 为了下拉刷新使用
+				bounces : false
+			});
+		}
+
+
+	</script>
+</html>

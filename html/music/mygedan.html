@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/Hui.css" />
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+    <title>Document</title>
+</head>
+<style>
+    html,
+    body {
+        height: 100%;
+        background-color: transparent;
+        overflow: hidden;
+    }
+
+    .mask {
+        height: 40%;
+    }
+
+    .main {
+        /*-webkit-transition: all .3s;
+    transition: all .3s;
+    -webkit-transform: translateY(100%);*/
+        height: 60%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-flex-flow: column;
+        flex-flow: column;
+    }
+
+    .main.in {
+        -webkit-transform: translateY(0%);
+    }
+
+    #main {
+        position: relative;
+        overflow: auto;
+        /*-webkit-overflow-scrolling: touch;*/
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+    }
+</style>
+
+<body>
+    <div class="mask" onclick="api.closeFrame()"></div>
+    <div class="main" id="app">
+        <header class="H-header H-theme-background-color2 " id="header" style="position:fixed;z-index:100; width:100%;">
+            <span class="H-icon H-position-relative H-display-inline-block H-float-left H-vertical-middle H-theme-font-color-white H-padding-horizontal-left-15 H-z-index-100" @click="openCreatGeDan()"><i tapmode  class="H-iconfont H-icon-add H-font-size-18 H-vertical-middle"></i> </span>
+            <div class="H-header-title H-center-all H-font-size-18 H-text-show-row-1 H-theme-font-color-white H-position-absolute H-width-100-percent">歌单列表</div>
+            <span class="H-icon H-position-relative H-display-inline-block H-float-right H-vertical-middle H-theme-font-color-white H-padding-horizontal-right-15 H-z-index-100" @click="api.closeFrame()"><i tapmode  class="H-iconfont H-icon-close H-font-size-18 H-vertical-middle"></i></span>
+        </header>
+        <div id="main">
+            <div class="  " style="" v-for="item in datalist">
+                <div @click="addto(item.id)" class="H-text-list H-flexbox-horizontal  H-theme-background-color-white H-border-vertical-bottom-after H-vertical-middle H-touch-active">
+                    <div class="H-flex-item H-padding-horizontal-both-10 H-font-size-16 H-padding-vertical-both-12">{{item.name}} </div>
+                    <span class="H-icon H-padding-horizontal-right-5 H-display-block"><i class="H-iconfont H-icon-arrow-right H-theme-font-color-ccc H-font-size-14 H-vertical-middle"></i></span></div>
+
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/axios.min.js"></script>
+<script type="text/javascript" src="../../script/musicapi.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        api.showProgress({
+            style: 'default',
+            animationType: 'fade',
+            title: '努力加载中...',
+            text: '先喝杯茶...',
+            modal: false
+        });
+
+        app.init()
+
+
+    }
+    var app = new Vue({
+        el: "#app",
+        data: {
+            datalist: []
+        },
+        methods: {
+            init() {
+
+                getCache('mygedan', 'datalist', function(ret, err) {
+                    if (ret.data) {
+
+                        // console.log(JSON.stringify(ret));
+                        app.datalist = $api.strToJson(ret.data);
+                        app.geMyGeDan()
+
+                    } else {
+                        app.geMyGeDan()
+                    }
+                })
+                api.hideProgress();
+
+            },
+            addto(pid) {
+                var params = {
+                    op: 'add',
+                    tracks: api.pageParam.id,
+                    pid:pid
+                }
+
+
+                $ku.playlistEdit(params, function(ret, err) {
+                    console.log(JSON.stringify(ret));
+                    if (ret.code == 200) {
+                        api.toast({
+                            msg: '添加成功',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+
+
+
+                    } else if (ret.code == 502) {
+                        api.closeFrame();
+                        api.toast({
+                            msg: '歌单内歌曲重复',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+
+
+                    }
+                })
+            },
+            creatGeDan(title) {
+
+
+                var timestamp = Date.parse(new Date())
+                var params = {
+                    timestamp: timestamp,
+                    name: title
+                }
+                $ku.createNewGeDan(params, function(ret, err) {
+                    var dialogBox = api.require('dialogBox');
+                    if (ret.code == 200) {
+                        app.geMyGeDan()
+                        api.toast({
+                            msg: '创建成功',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        dialogBox.close({
+                            dialogName: 'input'
+                        });
+
+                    } else {
+                        api.alert({
+                            title: '数据错误',
+                            msg: '数据错误',
+                        }, function(ret, err) {
+                            dialogBox.close({
+                                dialogName: 'input'
+                            });
+                            if (ret) {
+                                // alert( JSON.stringify( ret ) );
+                            } else {
+                                // alert( JSON.stringify( err ) );
+                            }
+                        });
+
+                    }
+                })
+
+            },
+            geMyGeDan() {
+
+                $ku.getUserPlaylist({
+                    uid: $api.getStorage('userinfo').userId
+                }, function(ret, err) {
+
+                    if (ret) {
+                        var data
+                        data = ret.playlist.filter(function(x) {
+                            return x.creator.userId == $api.getStorage('userinfo').userId;
+                        });
+                        saveCache('mygedan', 'datalist', data)
+                        app.datalist = data;
+                        // console.log(JSON.stringify(app.datalist))
+                    } else {
+                        // alert(JSON.stringify(err));
+                    }
+
+
+                });
+            },
+            openCreatGeDan() {
+                var dialogBox = api.require('dialogBox');
+                dialogBox.input({
+                    keyboardType: 'default',
+                    texts: {
+                        title: '歌单名称',
+                        placeholder: '歌单名称',
+                        leftBtnTitle: '取消',
+                        rightBtnTitle: '确定'
+                    },
+                    tapClose: true,
+                    styles: {
+                        bg: '#fff',
+                        corner: 10,
+                        w: 300,
+                        h: 240,
+
+                        title: {
+                            h: 60,
+                            alignment: 'center',
+                            size: 16,
+                            color: '#000',
+                            marginT: 30,
+                        },
+                        input: {
+                            h: 60,
+                            y: 30,
+                            marginT: 15,
+                            marginLeft: 10,
+                            marginRight: 10,
+                            textSize: 14,
+                            textColor: '#000'
+                        },
+                        dividingLine: {
+                            width: 0.5,
+                            color: '#696969'
+                        },
+                        left: {
+                            bg: 'rgba(0,0,0,0)',
+                            color: '#007FFF',
+                            size: 12
+                        },
+                        right: {
+                            bg: 'rgba(0,0,0,0)',
+                            color: '#007FFF',
+                            size: 12
+                        }
+                    }
+                }, function(ret) {
+                    var dialogBox = api.require('dialogBox');
+                    if (ret.eventType == 'right') {
+
+                        app.creatGeDan(ret.text)
+                    } else {
+                        dialogBox.close({
+                            dialogName: 'input'
+                        });
+                    }
+                });
+            }
+        }
+    })
+</script>
+
+</html>
