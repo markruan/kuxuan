@@ -271,7 +271,6 @@
      
         uiloading()
         app.huandeng()
-        app.getRankList()
         if ($api.getStorage('isNew')) {
 
 
@@ -299,8 +298,6 @@
         }, function (ret, err) {
             app.huandeng()
             app.getRankList()
-            
-            
             api.hideProgress();
             api.refreshHeaderLoadDone();
            
@@ -332,8 +329,8 @@
                 }, function (ret, err) {
                     if (ret.banners) {
                         app.showIndex=true
-                        app.getkulist()
-                        app.getkulist()
+                        app.getRankList()
+                        app.getkulist() 
                         app.getArtists()
                         app.getTuiList()
                         app.getAlbumList()
@@ -475,6 +472,7 @@
             },
             getRankList() {//排行榜
                 getCache('hot', 'hot', function (ret, err) {
+                    
                     if (ret.data) {
                         var data = $api.strToJson(ret.data)
                         // delCache('hot','hot')
@@ -506,8 +504,8 @@
                 })
             },
             openUICoverFlow(data) {
-                var UICoverFlow = api.require('UICoverFlow');
-              
+          
+                var UICoverFlow = api.require('UICoverFlow'); 
                 UICoverFlowToTop=$api.offset($api.byId('rank')).t 
                 UICoverFlow.open({
                     rect: {
@@ -535,6 +533,7 @@
                     fixedOn: api.frameName,
                     fixed: false
                 }, function (ret, err) {
+                    console.log(JSON.stringify(ret))
                     if (ret) {
 
                         if (ret.eventType == 'click') {
@@ -635,7 +634,8 @@
 
         },
         mounted() {
-       
+          
+    
         }
     })
 </script>
