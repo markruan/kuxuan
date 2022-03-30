@@ -34,9 +34,8 @@
                     ImgSpacing: 30 // 图片之间的间隔
                 }
             }, function (ret, err) {
-                $ku.loginStatus(function (ret, err) {
-                  
-                    if (ret.code != 200) {
+                $ku.loginStatus(function (ret, err) { 
+                    if (ret.data.code != 200) {
                         api.openTabLayout({
                             name: 'login',
                             url: 'widget://html/entry/entry_head.html',

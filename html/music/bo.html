@@ -553,7 +553,7 @@
 					id: app.music_id,
 					timestamp: timestamp
 				}, function(ret, err) {
-					//  console.log(JSON.stringify(data));
+					 console.log(JSON.stringify(err));
 					app.islike = app.islike ? false : true
 
 					if (ret.code == 200) {
