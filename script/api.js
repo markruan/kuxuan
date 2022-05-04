@@ -928,6 +928,7 @@ function goback1() {
 
 }
 
+// 打开首页
 function openIndex() {
     api.openSlidLayout({
         type: 'left',
