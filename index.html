@@ -1,64 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport"
-        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
-    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+    />
+    <meta
+      name="format-detection"
+      content="telephone=no,email=no,date=no,address=no"
+    />
     <title>index</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <script src="script/H.js" type="text/javascript"></script>
     <script src="script/api.js" type="text/javascript"></script>
     <script type="text/javascript" src="script/musicapi.js"></script>
     <script type="text/javascript" src="script/axios.min.js"></script>
     <script type="text/javascript">
-      
-            
-        H.ready(function () {
-            var WelcomePage = api.require('welcomePage');
-               // 断网了
-            
-            WelcomePage.openWelcomePage({
-                isFullscreen: true, //是否全屏(全屏不显示状态栏)  默认false
-                AnimationType: 'DepthPage', //动画类型   'Default默认', 'DepthPage深入浅出', 'Cube立方体', 'Rotate旋转','Accordion左右折叠',
-                //'InRightUp右上角进入' , 'InRightDown右下角进入', 'ZoomOutPage淡入淡出'
-                imgs: ['widget://res/g1.jpeg', 'widget://res/g2.jpeg', 'widget://res/g3.jpg'],
-                setting: {
-                    isShow: true, // 是否显示页面点 默认不显示
-                    // SelectedImg: 'widget://image/Welcome/2.png',
-                    // NotSelectedImg: 'widget://image/Welcome/1.png',
-                    ImgSize: 10, // 图片size
-                    ImgSpacing: 30 // 图片之间的间隔
-                }
-            }, function (ret, err) {
-                $ku.loginStatus(function (ret, err) {
-                    if (ret.data.code != 200) {
-                        api.openTabLayout({
-                            name: 'login',
-                            url: 'widget://html/entry/entry_head.html',
-                            bgColor: 'widget://image/1.jpg',
-                            animation: {
-                                type: "movein", //动画类型（详见动画类型常量）
-                                subType: "from_right", //动画子类型（详见动画子类型常量）
-                                duration: 400 //动画过渡时间，默认300毫秒
-                            },
-                            hideNavigationBar: true,
+      H.ready(function () {
+        var WelcomePage = api.require("welcomePage");
+        // 断网了
 
-                        });
-                    } else {
-                        openIndex()
-                    }
-                })
-
+        WelcomePage.openWelcomePage(
+          {
+            isFullscreen: true, //是否全屏(全屏不显示状态栏)  默认false
+            AnimationType: "DepthPage", //动画类型   'Default默认', 'DepthPage深入浅出', 'Cube立方体', 'Rotate旋转','Accordion左右折叠',
+            //'InRightUp右上角进入' , 'InRightDown右下角进入', 'ZoomOutPage淡入淡出'
+            imgs: [
+              "widget://res/g1.jpeg",
+              "widget://res/g2.jpeg",
+              "widget://res/g3.jpg",
+            ],
+            setting: {
+              isShow: true, // 是否显示页面点 默认不显示
+              // SelectedImg: 'widget://image/Welcome/2.png',
+              // NotSelectedImg: 'widget://image/Welcome/1.png',
+              ImgSize: 10, // 图片size
+              ImgSpacing: 30, // 图片之间的间隔
+            },
+          },
+          function (ret, err) {
+            $ku.loginStatus(function (ret, err) {
+              if (ret.data.code != 200) {
+                api.openTabLayout({
+                  name: "login",
+                  url: "widget://html/entry/entry_head.html",
+                  bgColor: "widget://image/1.jpg",
+                  animation: {
+                    type: "movein", //动画类型（详见动画类型常量）
+                    subType: "from_right", //动画子类型（详见动画子类型常量）
+                    duration: 400, //动画过渡时间，默认300毫秒
+                  },
+                  hideNavigationBar: true,
+                });
+              } else {
+                openIndex();
+              }
             });
-        });
-
-  
-       
+          }
+        );
+      });
     </script>
-</body>
-
+  </body>
 </html>
