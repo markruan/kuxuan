@@ -33,8 +33,8 @@
   <preference name="urlScheme" value="kuxuan" />
   <access origin="*"/>
   <feature name="wxPlus">
-    <param name="urlScheme" value="wx1da1cc85d2210c0f"/>
-    <param name="apiKey" value="wx1da1cc85d2210c0f"/>
-    <param name="apiSecret" value="d0170de08adeb18419d334473e7d7dd0"/>
+    <param name="urlScheme" value="***"/>
+    <param name="apiKey" value="***"/>
+    <param name="apiSecret" value="***"/>
   </feature>
 </widget>
